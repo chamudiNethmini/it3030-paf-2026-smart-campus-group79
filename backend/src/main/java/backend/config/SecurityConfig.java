@@ -22,10 +22,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login**", "/error").permitAll()
 
-                        // 🔒 PROTECTED ROUTES
-                        .requestMatchers("/api/users/admin/**").hasRole("ADMIN")
+                        // Resource endpoints allow for testing / frontend connection
+                        .requestMatchers("/api/resources/**").permitAll()
 
-                        .requestMatchers("/api/**").authenticated()
+                        // existing admin routes
+                        .requestMatchers("/api/users/admin/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )
