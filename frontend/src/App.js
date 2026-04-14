@@ -8,7 +8,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<FacilitiesPage />} />
+        <Route path="/" element={<AddResource />} />
         <Route path="/facilities" element={<FacilitiesPage />} />
         <Route path="/admin/add-resource" element={<AddResource />} />
       </Routes>

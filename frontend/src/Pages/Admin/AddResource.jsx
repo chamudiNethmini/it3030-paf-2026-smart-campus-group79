@@ -152,33 +152,43 @@ const AddResource = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    try {
-      const payload = {
-        ...formData,
-        capacity: Number(formData.capacity),
-        availabilityStart: `${formData.availabilityStart}:00`,
-        availabilityEnd: `${formData.availabilityEnd}:00`,
-      };
+  try {
+    const payload = {
+      ...formData,
+      capacity: Number(formData.capacity),
+      availabilityStart: `${formData.availabilityStart}:00`,
+      availabilityEnd: `${formData.availabilityEnd}:00`,
+    };
 
-      if (editingId) {
-        await updateResource(editingId, payload);
-        alert("Resource updated successfully");
-      } else {
-        await addResource(payload);
-        alert("Resource added successfully");
-      }
+    console.log("Sending payload:", payload);
 
-      resetForm();
-      loadResources();
-    } catch (error) {
-      console.error("Save error:", error);
-      alert(error.response?.data?.message || "Failed to save resource");
+    if (editingId) {
+      await updateResource(editingId, payload);
+      alert("Resource updated successfully");
+    } else {
+      await addResource(payload);
+      alert("Resource added successfully");
     }
-  };
+
+    resetForm();
+    loadResources();
+  } catch (error) {
+    console.error("Save error full:", error);
+    console.error("Response data:", error.response?.data);
+    console.error("Status:", error.response?.status);
+
+    alert(
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      "Failed to save resource"
+    );
+  }
+};
 
   const handleEdit = (resource) => {
     setEditingId(resource.id);
