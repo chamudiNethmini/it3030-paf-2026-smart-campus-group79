@@ -7,7 +7,7 @@ target/
 *.jar
 *.war
 
-# Maven wrapper (optional keep or ignore)
+# Maven wrapper
 .mvn/wrapper/maven-wrapper.jar
 
 # ======================
@@ -54,26 +54,32 @@ frontend/node_modules/
 build/
 frontend/build/
 dist/
+frontend/dist/
 
-# logs
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
 # ======================
 # ENV / SECRETS 🔐
 # ======================
 .env
 .env.local
+.env.production
+.env.development
 
-# VERY IMPORTANT (do not push secrets)
+# VERY IMPORTANT - database & oauth secrets
 application.properties
+backend/src/main/resources/application.properties
 
 # ======================
 # OS FILES
 # ======================
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # ======================
 # GIT KEEP RULES
