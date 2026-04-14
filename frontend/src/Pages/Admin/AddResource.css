@@ -1,0 +1,254 @@
+.resource-page {
+  min-height: 100vh;
+  padding: 32px;
+  background: linear-gradient(180deg, #eef6ff 0%, #e7f1fb 100%);
+}
+
+.resource-page-header {
+  margin-bottom: 24px;
+}
+
+.resource-page-header h1 {
+  font-size: 32px;
+  color: #2f4768;
+  margin-bottom: 8px;
+}
+
+.resource-page-header p {
+  color: #667991;
+  line-height: 1.7;
+  max-width: 760px;
+}
+
+.resource-form-card,
+.resource-list-card {
+  background: linear-gradient(135deg, #f8fbff, #edf5ff);
+  border: 1px solid #d8e4f4;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 12px 24px rgba(205, 214, 228, 0.14);
+  margin-bottom: 28px;
+}
+
+.resource-form-card h2,
+.resource-list-card h2 {
+  color: #355377;
+  margin-bottom: 18px;
+  font-size: 22px;
+}
+
+.resource-form {
+  display: grid;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #355377;
+}
+
+.form-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.resource-form input,
+.resource-form select,
+.resource-form textarea,
+.search-bar-row input,
+.search-bar-row select {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid #d7e3f1;
+  background: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s ease;
+  box-sizing: border-box;
+}
+
+.resource-form input,
+.resource-form select,
+.search-bar-row input,
+.search-bar-row select {
+  height: 46px;
+  padding: 0 14px;
+}
+
+.resource-form textarea {
+  padding: 12px 14px;
+  min-height: 120px;
+  resize: vertical;
+}
+
+.resource-form input:focus,
+.resource-form select:focus,
+.resource-form textarea:focus,
+.search-bar-row input:focus,
+.search-bar-row select:focus {
+  border-color: #b7cfff;
+  box-shadow: 0 0 0 3px rgba(184, 216, 255, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.primary-btn,
+.secondary-btn,
+.edit-btn,
+.delete-btn,
+.download-pdf-btn {
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  border-radius: 14px;
+  padding: 12px 18px;
+  transition: 0.2s ease;
+}
+
+.primary-btn,
+.download-pdf-btn {
+  background: linear-gradient(135deg, #b8d8ff, #d8cbff);
+  color: #28435e;
+}
+
+.secondary-btn {
+  background: #ffffff;
+  border: 1px solid #d7e3f1;
+  color: #5c6e85;
+}
+
+.edit-btn {
+  background: #e8f1ff;
+  color: #355377;
+}
+
+.delete-btn {
+  background: #fdeaea;
+  color: #b33a3a;
+}
+
+.primary-btn:hover,
+.secondary-btn:hover,
+.edit-btn:hover,
+.delete-btn:hover,
+.download-pdf-btn:hover {
+  transform: translateY(-2px);
+}
+
+.search-bar-row {
+  display: grid;
+  grid-template-columns: 220px 1fr auto auto;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.resource-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 18px;
+}
+
+.resource-item-card {
+  background: #ffffff;
+  border: 1px solid #dce7f5;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 18px rgba(205, 214, 228, 0.1);
+}
+
+.resource-item-card h3 {
+  color: #355377;
+  margin-bottom: 10px;
+}
+
+.resource-item-card p {
+  color: #6d7d91;
+  line-height: 1.7;
+  margin-bottom: 6px;
+}
+
+.resource-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.resource-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.status-badge {
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.active-status {
+  background: #e8f8ee;
+  color: #23864d;
+}
+
+.inactive-status {
+  background: #fdeaea;
+  color: #b33a3a;
+}
+
+.resource-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.field-error {
+  color: #d62828;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .form-two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .search-bar-row {
+    grid-template-columns: 1fr;
+  }
+
+  .resource-page {
+    padding: 20px;
+  }
+
+  .form-actions,
+  .resource-card-actions {
+    flex-direction: column;
+  }
+
+  .primary-btn,
+  .secondary-btn,
+  .edit-btn,
+  .delete-btn,
+  .download-pdf-btn {
+    width: 100%;
+  }
+}
