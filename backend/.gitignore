@@ -1,10 +1,18 @@
-HELP.md
+# ======================
+# JAVA / SPRING BOOT
+# ======================
 target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+*.class
+*.log
+*.jar
+*.war
 
-### STS ###
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# ======================
+# SPRING TOOL SUITE (STS)
+# ======================
 .apt_generated
 .classpath
 .factorypath
@@ -13,13 +21,17 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
+# ======================
+# INTELLIJ IDEA
+# ======================
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# ======================
+# NETBEANS
+# ======================
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -29,5 +41,48 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# ======================
+# VS CODE
+# ======================
 .vscode/
+
+# ======================
+# NODE / REACT
+# ======================
+node_modules/
+frontend/node_modules/
+build/
+frontend/build/
+dist/
+frontend/dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ======================
+# ENV / SECRETS 🔐
+# ======================
+.env
+.env.local
+.env.production
+.env.development
+
+# VERY IMPORTANT - database & oauth secrets
+application.properties
+backend/src/main/resources/application.properties
+
+# ======================
+# OS FILES
+# ======================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ======================
+# GIT KEEP RULES
+# ======================
+!**/src/main/**/target/
+!**/src/test/**/target/
