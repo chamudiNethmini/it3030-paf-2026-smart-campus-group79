@@ -12,6 +12,8 @@ public class Notification {
 
     private String message;
 
+    private boolean isRead = false;
+
     private LocalDateTime createdAt;
 
     public Notification() {
@@ -34,5 +36,13 @@ public class Notification {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
     }
 }
