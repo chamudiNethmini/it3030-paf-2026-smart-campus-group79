@@ -31,13 +31,18 @@ function Navbar() {
           </Link>
           <Link
             to="/admin/bookings"
-            className={location.pathname === "/admin/bookings" ? "active-link" : ""}
+            className={
+              location.pathname === "/admin/bookings" ? "active-link" : ""
+            }
           >
             Manage Bookings
           </Link>
         </div>
 
         <div className="navbar-right">
+          <Link to="/login" className="navbar-btn">
+            Login
+          </Link>
           <Link to="/admin/bookings" className="navbar-btn">
             Admin
           </Link>
