@@ -31,6 +31,8 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
+                        // ✅ IMPORTANT FIX
+                        .defaultSuccessUrl("http://localhost:3000/dashboard", true)
                 );
 
         return http.build();

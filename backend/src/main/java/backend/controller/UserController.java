@@ -7,6 +7,7 @@ import backend.repository.NotificationRepository;
 import backend.repository.UserRepository;
 import backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
@@ -39,6 +40,12 @@ public class UserController {
     public List<User> getUsers() {
         return userService.getAllUsers();
     }
+
+    // ✅ NEW - current logged user (FIXED: missing closing brace)
+    @GetMapping("/me")
+    public Object getCurrentUser(Authentication authentication) {
+        return authentication.getPrincipal();
+    }  // ← මෙතන closing brace එක තිබුණේ නැහැ
 
     @GetMapping("/admin")
     public String adminOnly() {
