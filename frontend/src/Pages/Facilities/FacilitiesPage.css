@@ -1,56 +1,191 @@
 .facilities-page {
   min-height: 100vh;
-  padding: 40px;
-  background: linear-gradient(180deg, #eef6ff 0%, #e7f1fb 100%);
+  background: linear-gradient(180deg, #edf4ff 0%, #eef3fa 100%);
 }
 
-.facilities-header {
-  margin-bottom: 24px;
+.facilities-hero {
+  background-image: linear-gradient(rgba(10, 26, 61, 0.58), rgba(10, 26, 61, 0.58)),
+    url("https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1400&q=80");
+  background-size: cover;
+  background-position: center;
+  padding: 24px 24px 90px;
 }
 
-.facilities-header h1 {
-  font-size: 34px;
-  color: #2f4768;
-  margin-bottom: 8px;
+.facilities-nav {
+  max-width: 1250px;
+  margin: 0 auto 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  background: rgba(9, 30, 75, 0.9);
+  border-radius: 999px;
+  padding: 14px 22px;
+  backdrop-filter: blur(12px);
 }
 
-.facilities-header p {
-  color: #667991;
+.facilities-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.facilities-logo {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3c7bff, #6f7cff);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.facilities-brand h3 {
+  color: white;
+  margin: 0;
+}
+
+.facilities-brand p {
+  margin: 0;
+  color: #dce5f7;
+  font-size: 13px;
+}
+
+.facilities-nav-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.facilities-nav-btn {
+  border: none;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.facilities-nav-btn:hover,
+.active-nav {
+  background: linear-gradient(135deg, #3c7bff, #6f7cff);
+}
+
+.facilities-hero-content {
+  max-width: 1250px;
+  margin: 0 auto;
+  color: white;
+}
+
+.facilities-pill {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.facilities-hero-content h1 {
+  font-size: 58px;
+  margin-bottom: 14px;
+}
+
+.facilities-hero-content p {
+  font-size: 22px;
   line-height: 1.7;
+  max-width: 720px;
+  color: #e5ecf8;
+}
+
+.facilities-search-card,
+.facilities-list-section {
+  max-width: 1250px;
+  margin: -45px auto 30px;
+  background: white;
+  border-radius: 26px;
+  padding: 28px;
+  box-shadow: 0 16px 40px rgba(171, 188, 214, 0.2);
+}
+
+.facilities-list-section {
+  margin-top: 0;
+}
+
+.facilities-search-card h2,
+.facilities-list-section h2 {
+  color: #27486d;
+  margin-bottom: 18px;
 }
 
 .facilities-filter-bar {
   display: grid;
-  grid-template-columns: 220px 1fr auto auto;
+  grid-template-columns: 240px 1fr auto auto;
   gap: 14px;
-  margin-bottom: 28px;
-  background: linear-gradient(135deg, #f8fbff, #edf5ff);
-  border: 1px solid #d8e4f4;
-  border-radius: 20px;
-  padding: 20px;
 }
 
 .facilities-filter-bar input,
 .facilities-filter-bar select {
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid #d7e3f1;
-  background: #fff;
+  height: 52px;
+  border-radius: 14px;
+  border: 1px solid #d7e1ef;
+  padding: 0 14px;
+  font-size: 15px;
   outline: none;
+}
+
+.search-btn,
+.reset-btn,
+.manage-resource-btn {
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.search-btn,
+.manage-resource-btn {
+  background: linear-gradient(135deg, #3c7bff, #6f7cff);
+  color: white;
+}
+
+.reset-btn {
+  background: #edf2fb;
+  color: #365372;
+}
+
+.search-btn:hover,
+.reset-btn:hover,
+.manage-resource-btn:hover {
+  transform: translateY(-2px);
+}
+
+.section-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
 }
 
 .facilities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 22px;
 }
 
 .facility-card {
-  background: #ffffff;
-  border: 1px solid #dce7f5;
+  background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+  border: 1px solid #deebf8;
   border-radius: 22px;
   padding: 22px;
-  box-shadow: 0 12px 24px rgba(205, 214, 228, 0.16);
+  box-shadow: 0 10px 22px rgba(209, 219, 234, 0.15);
 }
 
 .facility-top {
@@ -58,18 +193,18 @@
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .facility-card h3 {
-  color: #355377;
+  color: #2d4e73;
   margin: 0;
 }
 
 .facility-card p {
-  color: #6d7d91;
+  color: #667991;
   line-height: 1.7;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .status-badge {
@@ -89,53 +224,34 @@
   color: #b33a3a;
 }
 
-.book-btn,
-.primary-btn,
-.secondary-btn,
-.unavailable-btn {
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  border-radius: 14px;
-  padding: 12px 18px;
-}
-
-.book-btn,
-.primary-btn {
-  background: linear-gradient(135deg, #b8d8ff, #d8cbff);
-  color: #28435e;
-}
-
-.secondary-btn {
-  background: #ffffff;
-  border: 1px solid #d7e3f1;
-  color: #5c6e85;
-}
-
-.book-btn {
-  margin-top: 14px;
-  width: 100%;
-}
-
-.unavailable-btn {
-  margin-top: 14px;
-  width: 100%;
-  background: #eef1f5;
-  color: #8c96a3;
-  cursor: not-allowed;
-}
-
 .empty-text {
   color: #667991;
   font-weight: 600;
 }
 
 @media (max-width: 900px) {
+  .facilities-nav {
+    border-radius: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .facilities-hero-content h1 {
+    font-size: 40px;
+  }
+
+  .facilities-hero-content p {
+    font-size: 18px;
+  }
+
   .facilities-filter-bar {
     grid-template-columns: 1fr;
   }
 
-  .facilities-page {
+  .facilities-search-card,
+  .facilities-list-section {
+    margin-left: 18px;
+    margin-right: 18px;
     padding: 20px;
   }
 }

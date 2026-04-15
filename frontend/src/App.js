@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+import ResourceHome from "./Pages/Home/ResourceHome";
 import FacilitiesPage from "./Pages/Facilities/FacilitiesPage";
 import AddResource from "./Pages/Admin/AddResource";
 import BookingPage from "./Pages/Booking/BookingPage";
@@ -11,6 +12,7 @@ function App() {
   return (
     <Router>
       <Routes>
+         <Route path="/" element={<ResourceHome />} />
         <Route path="/" element={<AddResource />} />
         <Route path="/facilities" element={<FacilitiesPage />} />
         <Route path="/admin/add-resource" element={<AddResource />} />
