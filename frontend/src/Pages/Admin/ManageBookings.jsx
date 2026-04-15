@@ -5,6 +5,8 @@ import {
   deleteBooking
 } from "../../services/bookingService";
 import "./ManageBookings.css";
+import Navbar from "../../Components/Navbar";
+
 
 function ManageBookings() {
   const [bookings, setBookings] = useState([]);
@@ -74,6 +76,8 @@ function ManageBookings() {
       : bookings.filter((booking) => booking.status === statusFilter);
 
   return (
+    <>
+    <Navbar/>
     <div className="manage-bookings-page">
       <div className="manage-bookings-container">
         <h2>Manage Bookings</h2>
@@ -166,6 +170,7 @@ function ManageBookings() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
