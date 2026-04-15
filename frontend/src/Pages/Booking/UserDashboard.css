@@ -1,0 +1,103 @@
+.dashboard-page {
+  min-height: 100vh;
+  background: #f4f7fb;
+  padding: 40px 20px;
+}
+
+.dashboard-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.dashboard-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #1f2937;
+}
+
+.search-bar {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.search-bar input {
+  width: 320px;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.search-bar button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.search-bar button:hover {
+  background: #1d4ed8;
+}
+
+.error-message {
+  text-align: center;
+  color: red;
+  margin-bottom: 20px;
+}
+
+.no-bookings {
+  text-align: center;
+  color: #6b7280;
+  margin-top: 20px;
+}
+
+.booking-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.booking-card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.booking-card h3 {
+  margin-bottom: 15px;
+  color: #111827;
+}
+
+.booking-card p {
+  margin: 8px 0;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.status {
+  margin-left: 8px;
+  font-weight: 700;
+}
+
+.status.pending {
+  color: #d97706;
+}
+
+.status.approved {
+  color: #16a34a;
+}
+
+.status.rejected {
+  color: #dc2626;
+}
+
+.status.cancelled {
+  color: #6b7280;
+}
