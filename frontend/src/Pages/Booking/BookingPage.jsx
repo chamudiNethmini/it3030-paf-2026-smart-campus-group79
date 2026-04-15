@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { createBooking } from "../../services/bookingService";
 import "./BookingPage.css";
+import Navbar from "../../Components/Navbar";
 
 function BookingPage() {
   const [formData, setFormData] = useState({
@@ -74,6 +75,8 @@ function BookingPage() {
   };
 
   return (
+    <>
+    <Navbar />
     <div className="booking-page">
       <div className="booking-card">
         <h2>Book a Resource</h2>
@@ -146,6 +149,7 @@ function BookingPage() {
         {error && <p className="error">{error}</p>}
       </div>
     </div>
+     </>
   );
 }
 

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { getMyBookings } from "../../services/bookingService";
 import "./UserDashboard.css";
+import Navbar from "../../Components/Navbar";
+
 
 function UserDashboard() {
   const [userEmail, setUserEmail] = useState("");
@@ -23,6 +25,8 @@ function UserDashboard() {
   };
 
   return (
+    <>
+     <Navbar />
     <div className="dashboard-page">
       <div className="dashboard-container">
         <h2>My Bookings</h2>
@@ -69,6 +73,7 @@ function UserDashboard() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
