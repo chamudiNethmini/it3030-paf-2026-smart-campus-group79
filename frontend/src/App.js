@@ -1,7 +1,11 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+<<<<<<< HEAD
 import LoginPage from "./Pages/Login/LoginPage";
+=======
+import ResourceHome from "./Pages/Home/ResourceHome";
+>>>>>>> main
 import FacilitiesPage from "./Pages/Facilities/FacilitiesPage";
 import AddResource from "./Pages/Admin/AddResource";
 import BookingPage from "./Pages/Booking/BookingPage";
@@ -12,9 +16,14 @@ function App() {
   return (
     <Router>
       <Routes>
+<<<<<<< HEAD
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<UserDashboard />} />
+=======
+         <Route path="/" element={<ResourceHome />} />
+        <Route path="/" element={<AddResource />} />
+>>>>>>> main
         <Route path="/facilities" element={<FacilitiesPage />} />
         <Route path="/admin/add-resource" element={<AddResource />} />
         <Route path="/bookings" element={<BookingPage />} />
