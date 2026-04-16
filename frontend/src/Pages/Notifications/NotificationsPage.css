@@ -9,17 +9,58 @@
 .notifications-container {
   max-width: 800px;
   margin: 0 auto;
+  padding-top: 30px;
 }
 
-/* ===== HEADING ===== */
-.notifications-container h2 {
-  text-align: center;
+/* ===== HEADER WITH BACK BUTTON ===== */
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 30px;
+  gap: 20px;
+}
+
+.notifications-header h2 {
+  margin: 0;
   color: #1f2937;
   font-size: 26px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+}
+
+.notifications-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-btn {
+  padding: 10px 20px;
+  background: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.back-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* ===== HEADING ===== */
+.notifications-header h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
   gap: 10px;
 }
 

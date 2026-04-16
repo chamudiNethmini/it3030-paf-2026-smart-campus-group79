@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../services/authService";
+import { loginUser, getCurrentUser } from "../../services/authService";
+import { AuthContext } from "../../context/AuthContext";
 import "./LoginPage.css";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { setUser } = useContext(AuthContext);
   const [hovering, setHovering] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -87,9 +89,10 @@ function LoginPage() {
       const response = await loginUser({ email: email.trim(), password });
 
       if (response.ok) {
-        const data = await response.json();
-        // Store user data or token if needed
-        localStorage.setItem("user", JSON.stringify(data));
+        // After successful form login, fetch user data
+        const userData = await getCurrentUser();
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
         navigate("/dashboard");
       } else {
         const errorData = await response.json();
