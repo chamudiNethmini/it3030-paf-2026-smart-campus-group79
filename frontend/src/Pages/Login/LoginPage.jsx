@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
 
 function LoginPage() {
-  const navigate = useNavigate();
-  const [hovering, setHovering] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate(); // ✅ FROM v1
+  const [hovering, setHovering] = useState(false); // ✅ FROM v1
+  const [email, setEmail] = useState(""); // ✅ FROM v1
+  const [password, setPassword] = useState(""); // ✅ FROM v1
 
   const handleLogin = async () => {
+    // ✅ FROM v1
     try {
-      // Email/password login (future use)
       navigate("/dashboard");
     } catch (err) {
       alert("Login failed");
@@ -18,19 +18,20 @@ function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
+    // ✅ FROM v1 — includes prompt + access_type params
     window.location.href =
       "http://localhost:8081/oauth2/authorization/google?prompt=select_account&access_type=offline";
   };
 
   return (
     <div className="login-page">
-      {/* Background blobs */}
+      {/* Background blobs — FROM v1 */}
       <div className="blob blob-1" />
       <div className="blob blob-2" />
       <div className="blob blob-3" />
 
       <div className="login-card">
-        {/* Logo */}
+        {/* Logo — FROM v1 */}
         <div className="login-logo">
           <div className="login-logo-circle">SC</div>
           <div className="login-logo-text">
@@ -39,10 +40,10 @@ function LoginPage() {
           </div>
         </div>
 
-        {/* Divider */}
+        {/* Divider — FROM v1 */}
         <div className="login-divider" />
 
-        {/* Welcome text */}
+        {/* Welcome text — FROM v1 */}
         <div className="login-welcome">
           <h2>Welcome Back</h2>
           <p>
@@ -50,26 +51,33 @@ function LoginPage() {
           </p>
         </div>
 
-        {/* Email */}
+        {/* Email — FROM both */}
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)} // ✅ FROM v1 (controlled)
+          className="login-input"
         />
 
-        {/* Password */}
+        {/* Password — FROM both */}
         <input
           type="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)} // ✅ FROM v1 (controlled)
+          className="login-input"
         />
 
-        {/* Login button */}
-        <button onClick={handleLogin}>Login</button>
+        {/* Login button — FROM both */}
+        <button className="login-btn" onClick={handleLogin}>
+          Login
+        </button>
 
-        {/* Google Login Button */}
+        {/* OR Divider — FROM v2 */}
+        <div className="login-or">OR</div>
+
+        {/* Google Login Button — FROM v1 (with hover animation) */}
         <button
           className={`google-btn ${hovering ? "hovered" : ""}`}
           onClick={handleGoogleLogin}
@@ -101,19 +109,15 @@ function LoginPage() {
           <span>Continue with Google</span>
         </button>
 
-        {/* Info note */}
+        {/* Info note — FROM v1 */}
         <p className="login-note">
           🔒 Your account role (Admin / User) is assigned automatically based on
           your email.
         </p>
 
-        {/* Signup link */}
-        <p
-          className="signup-link"
-          onClick={() => navigate("/signup")}
-          style={{ cursor: "pointer" }}
-        >
-          Don't have an account? Sign up
+        {/* Signup link — FROM v1 (navigate) */}
+        <p className="signup-link" onClick={() => navigate("/signup")}>
+          Don't have an account? <span>Sign up</span>
         </p>
       </div>
     </div>
