@@ -16,7 +16,7 @@ function ProtectedRoute({ children, role }) {
   }
 
   // Role check failed
-  if (role && user.role !== role) {
+  if (role && user?.role !== role) {
     return <Navigate to="/dashboard" replace />;
   }
 
