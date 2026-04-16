@@ -287,3 +287,25 @@
     padding: 36px 24px;
   }
 }
+
+/* ===== ERROR MESSAGE ===== */
+.signup-error {
+  background: rgba(220, 38, 38, 0.2);
+  border: 1px solid rgba(220, 38, 38, 0.5);
+  color: #ef4444;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+/* ===== ERROR INPUT STYLE ===== */
+.signup-input.error {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.signup-input.error:focus {
+  border-color: #ef4444;
+}

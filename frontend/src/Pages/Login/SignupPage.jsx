@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../../services/authService";
-import "./SignupPage.css"; // ✅ Use new CSS file
+import "./SignupPage.css";
 
 function SignupPage() {
   const navigate = useNavigate();
@@ -12,11 +12,80 @@ function SignupPage() {
     password: "",
   });
 
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
   const [loading, setLoading] = useState(false);
 
+  // ✅ Name validation - only letters and spaces, no numbers
+  const isValidName = (name) => {
+    const nameRegex = /^[A-Za-z\s]+$/;
+    return nameRegex.test(name);
+  };
+
+  // ✅ Email validation
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // ✅ Password validation (8-12 characters)
+  const isValidPassword = (password) => {
+    return password.length >= 8 && password.length <= 12;
+  };
+
+  const validateField = (name, value) => {
+    let error = "";
+
+    switch (name) {
+      case "name":
+        if (!value.trim()) {
+          error = "Full name is required";
+        } else if (!isValidName(value)) {
+          error = "Name can only contain letters and spaces (no numbers)";
+        }
+        break;
+
+      case "email":
+        if (!value.trim()) {
+          error = "Email address is required";
+        } else if (!isValidEmail(value)) {
+          error = "Please enter a valid email address (e.g., name@example.com)";
+        }
+        break;
+
+      case "password":
+        if (!value) {
+          error = "Password is required";
+        } else if (!isValidPassword(value)) {
+          error = "Password must be 8-12 characters long";
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: error }));
+    return error === "";
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
+  };
+
   const handleSignup = async () => {
-    if (!form.name || !form.email || !form.password) {
-      alert("Please fill all fields");
+    // Validate all fields
+    const isNameValid = validateField("name", form.name);
+    const isEmailValid = validateField("email", form.email);
+    const isPasswordValid = validateField("password", form.password);
+
+    if (!isNameValid || !isEmailValid || !isPasswordValid) {
       return;
     }
 
@@ -68,32 +137,43 @@ function SignupPage() {
           <p>Join Smart Campus to manage resources, bookings, and more.</p>
         </div>
 
+        {/* Name input */}
         <input
           type="text"
-          placeholder="Full Name"
-          className="signup-input"
+          name="name"
+          placeholder="Full Name (Letters only)"
+          className={`signup-input ${errors.name ? "error" : ""}`}
           value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          onChange={handleChange}
           onKeyPress={handleKeyPress}
         />
+        {errors.name && <div className="signup-error">{errors.name}</div>}
 
+        {/* Email input */}
         <input
           type="email"
+          name="email"
           placeholder="Email Address"
-          className="signup-input"
+          className={`signup-input ${errors.email ? "error" : ""}`}
           value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          onChange={handleChange}
           onKeyPress={handleKeyPress}
         />
+        {errors.email && <div className="signup-error">{errors.email}</div>}
 
+        {/* Password input */}
         <input
           type="password"
-          placeholder="Password"
-          className="signup-input"
+          name="password"
+          placeholder="Password (8-12 characters)"
+          className={`signup-input ${errors.password ? "error" : ""}`}
           value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          onChange={handleChange}
           onKeyPress={handleKeyPress}
         />
+        {errors.password && (
+          <div className="signup-error">{errors.password}</div>
+        )}
 
         <button
           className="signup-btn"
@@ -128,7 +208,9 @@ function SignupPage() {
         </button>
 
         <p className="signup-note">
-          🔒 Your account role (Admin / User) will be assigned automatically.
+          🔒 Password must be 8-12 characters long
+          <br />
+          🔒 Name can only contain letters and spaces
         </p>
 
         <p className="login-link" onClick={() => navigate("/login")}>
