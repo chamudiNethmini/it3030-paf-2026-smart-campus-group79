@@ -14,11 +14,19 @@ export const AuthProvider = ({ children }) => {
   const loadUser = async () => {
     try {
       const data = await getCurrentUser();
-      setUser(data);
+      console.log("AuthContext: Loaded user data:", data);
+      // Only set user if data has email (valid user)
+      if (data && data.email) {
+        setUser(data);
+      } else {
+        console.warn("AuthContext: No valid user data received");
+        setUser(null);
+      }
     } catch (err) {
       console.error("Auth error:", err);
+      setUser(null);
     } finally {
-      setLoading(false); // ✅ IMPORTANT
+      setLoading(false); // ✅ MUST - prevents infinite redirect
     }
   };
 

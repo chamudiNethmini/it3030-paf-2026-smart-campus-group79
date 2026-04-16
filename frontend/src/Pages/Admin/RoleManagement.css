@@ -1,0 +1,247 @@
+/* RoleManagement.css */
+
+.role-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.role-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.role-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0;
+}
+
+.role-header p {
+  color: #6b7280;
+  margin: 5px 0 0;
+  font-size: 14px;
+}
+
+.role-stats {
+  background: rgba(59, 130, 246, 0.1);
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 14px;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.role-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 24px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.role-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+}
+
+.role-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.role-table th {
+  text-align: left;
+  padding: 18px 20px;
+  background: #f8fafc;
+  font-weight: 600;
+  color: #1e293b;
+  border-bottom: 2px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.role-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.role-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.role-user-name {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.role-user-email {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge-admin {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.role-badge-user {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.role-select {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.role-select:hover {
+  border-color: #3b82f6;
+}
+
+.role-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.role-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  font-size: 16px;
+  color: #64748b;
+}
+
+.role-empty {
+  text-align: center;
+  padding: 50px;
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+/* Dark mode support (optional, matches login/signup theme) */
+@media (prefers-color-scheme: dark) {
+  .role-card {
+    background: #1e293b;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  .role-table th {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-bottom-color: #334155;
+  }
+  .role-table td {
+    border-bottom-color: #334155;
+  }
+  .role-user-name {
+    color: #f1f5f9;
+  }
+  .role-user-email {
+    color: #94a3b8;
+  }
+  .role-select {
+    background: #0f172a;
+    border-color: #475569;
+    color: #e2e8f0;
+  }
+  .role-badge-user {
+    background: #334155;
+    color: #cbd5e1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .role-table th,
+  .role-table td {
+    padding: 12px 16px;
+  }
+  .role-user-name {
+    font-size: 14px;
+  }
+  .role-user-email {
+    font-size: 12px;
+  }
+  .role-select {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+.role-error {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  color: #dc2626;
+  margin-top: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.role-error p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.role-retry-btn {
+  background: #667eea;
+  color: white;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.role-retry-btn:hover {
+  background: #5568d3;
+}
+
+@media (max-width: 600px) {
+  .role-container {
+    padding: 16px;
+  }
+  .role-table th:nth-child(2),
+  .role-table td:nth-child(2) {
+    display: none;
+  }
+  .role-table th:first-child,
+  .role-table td:first-child {
+    width: 60%;
+  }
+}
