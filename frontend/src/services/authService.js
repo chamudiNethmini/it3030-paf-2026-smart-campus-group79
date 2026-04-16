@@ -1,6 +1,6 @@
 const BASE_URL = "http://localhost:8081/api/users";
 
-// ✅ Login
+// ✅ Login (returns fetch Response)
 export const loginUser = async (data) => {
   return fetch(`${BASE_URL}/login`, {
     method: "POST",
@@ -12,7 +12,7 @@ export const loginUser = async (data) => {
   });
 };
 
-// ✅ Register
+// ✅ Register (returns fetch Response)
 export const registerUser = async (data) => {
   return fetch(BASE_URL, {
     method: "POST",
@@ -24,21 +24,26 @@ export const registerUser = async (data) => {
   });
 };
 
-// ✅ Current logged user ගන්න
+// ✅ Current logged user (returns parsed JSON)
 export const getCurrentUser = async () => {
   return fetch(`${BASE_URL}/me`, {
     credentials: "include",
   }).then((res) => res.json());
 };
 
-// ✅ සියලුම users ගන්න (ADMIN only)
+// ✅ Get all users (ADMIN only) – returns parsed JSON
 export const getAllUsers = async () => {
   return fetch(`${BASE_URL}/all`, {
     credentials: "include",
   }).then((res) => res.json());
 };
 
-// ✅ User role change කරන්න (ADMIN only)
+// ✅ Alias for getAllUsers (same as above)
+export const getUsers = async () => {
+  return getAllUsers();
+};
+
+// ✅ Update user role (ADMIN only) – returns parsed JSON
 export const updateUserRole = async (userId, role) => {
   return fetch(`${BASE_URL}/${userId}/role?role=${role}`, {
     method: "PUT",
@@ -46,7 +51,7 @@ export const updateUserRole = async (userId, role) => {
   }).then((res) => res.json());
 };
 
-// ✅ User delete කරන්න (ADMIN only)
+// ✅ Delete user (ADMIN only) – returns response text
 export const deleteUser = async (userId) => {
   return fetch(`${BASE_URL}/${userId}`, {
     method: "DELETE",

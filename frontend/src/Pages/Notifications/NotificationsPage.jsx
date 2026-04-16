@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getNotifications,
   markAsRead,
   getUnreadCount,
 } from "../../services/notificationService";
-import Navbar from "../../Components/Navbar";
 import "./NotificationsPage.css";
 import { toast } from "react-toastify";
 
 function NotificationsPage() {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -49,58 +50,56 @@ function NotificationsPage() {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div className="notifications-container">
-          <p className="status-msg">Loading notifications... ⏳</p>
-        </div>
-      </>
+      <div className="notifications-container">
+        <p className="status-msg">Loading notifications... ⏳</p>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <>
-        <Navbar />
-        <div className="notifications-container">
-          <p className="status-msg error">{error}</p>
-          <button className="retry-btn" onClick={loadData}>
-            Retry
-          </button>
-        </div>
-      </>
+      <div className="notifications-container">
+        <p className="status-msg error">{error}</p>
+        <button className="retry-btn" onClick={loadData}>
+          Retry
+        </button>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="notifications-container">
+    <div className="notifications-container">
+      <div className="notifications-header">
         <h2>
           Notifications 🔔
           {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
         </h2>
-
-        {notifications.length === 0 && (
-          <p className="empty">No notifications yet ✨</p>
-        )}
-
-        {notifications.map((n) => (
-          <div
-            key={n.id}
-            className={`notification-card ${n.read ? "read" : "unread"}`}
-          >
-            <div>
-              <p>{n.message}</p>
-            </div>
-
-            {!n.read && (
-              <button onClick={() => handleRead(n.id)}>Mark as Read</button>
-            )}
-          </div>
-        ))}
+        <div className="notifications-header-right">
+          <button className="back-btn" onClick={() => navigate("/dashboard")}>
+            ← Back to Dashboard
+          </button>
+        </div>
       </div>
-    </>
+
+      {notifications.length === 0 && (
+        <p className="empty">No notifications yet ✨</p>
+      )}
+
+      {notifications.map((n) => (
+        <div
+          key={n.id}
+          className={`notification-card ${n.read ? "read" : "unread"}`}
+        >
+          <div>
+            <p>{n.message}</p>
+          </div>
+
+          {!n.read && (
+            <button onClick={() => handleRead(n.id)}>Mark as Read</button>
+          )}
+        </div>
+      ))}
+    </div>
   );
 }
 

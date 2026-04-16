@@ -1,25 +1,119 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser, getCurrentUser } from "../../services/authService";
+import { AuthContext } from "../../context/AuthContext";
 import "./LoginPage.css";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { setUser } = useContext(AuthContext);
   const [hovering, setHovering] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // ✅ Enhanced Email validation function
+  const isValidEmail = (email) => {
+    // More strict email regex
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  // ✅ Password validation (8-12 characters)
+  const isValidPassword = (password) => {
+    return password.length >= 8 && password.length <= 12;
+  };
+
+  // ✅ Real-time email validation (while typing)
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+
+    // Clear error when user starts typing
+    if (error) setError("");
+  };
+
+  // ✅ Real-time password validation (while typing)
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+
+    // Clear error when user starts typing
+    if (error) setError("");
+  };
 
   const handleLogin = async () => {
+    // Clear previous error
+    setError("");
+
+    // ✅ Email validation
+    if (!email.trim()) {
+      setError("Please enter your email address");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError(
+        "Please enter a valid email address (e.g., username@domain.com)",
+      );
+      return;
+    }
+
+    // ✅ Check for common email typos
+    if (
+      email.includes("..") ||
+      email.includes("@.") ||
+      email.startsWith(".") ||
+      email.endsWith(".")
+    ) {
+      setError(
+        "Email contains invalid characters (.., @., leading/trailing dot)",
+      );
+      return;
+    }
+
+    // ✅ Password validation
+    if (!password) {
+      setError("Please enter your password");
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      setError("Password must be 8-12 characters long");
+      return;
+    }
+
+    setLoading(true);
     try {
-      // Email/password login (future use)
-      navigate("/dashboard");
+      const response = await loginUser({ email: email.trim(), password });
+
+      if (response.ok) {
+        // After successful form login, fetch user data
+        const userData = await getCurrentUser();
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        navigate("/dashboard");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Invalid email or password");
+      }
     } catch (err) {
-      alert("Login failed");
+      setError("Login failed. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
     window.location.href =
       "http://localhost:8081/oauth2/authorization/google?prompt=select_account&access_type=offline";
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
   };
 
   return (
@@ -39,7 +133,6 @@ function LoginPage() {
           </div>
         </div>
 
-        {/* Divider */}
         <div className="login-divider" />
 
         {/* Welcome text */}
@@ -50,24 +143,38 @@ function LoginPage() {
           </p>
         </div>
 
-        {/* Email */}
+        {/* Error message */}
+        {error && <div className="login-error">{error}</div>}
+
+        {/* Email input */}
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Email address"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={handleEmailChange}
+          onKeyPress={handleKeyPress}
+          className={`login-input ${error && !email ? "error" : ""}`}
+          autoComplete="email"
         />
 
-        {/* Password */}
+        {/* Password input */}
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Password (8-12 characters)"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={handlePasswordChange}
+          onKeyPress={handleKeyPress}
+          className="login-input"
+          autoComplete="current-password"
         />
 
         {/* Login button */}
-        <button onClick={handleLogin}>Login</button>
+        <button className="login-btn" onClick={handleLogin} disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
+
+        {/* OR Divider */}
+        <div className="login-or">OR</div>
 
         {/* Google Login Button */}
         <button
@@ -103,17 +210,14 @@ function LoginPage() {
 
         {/* Info note */}
         <p className="login-note">
-          🔒 Your account role (Admin / User) is assigned automatically based on
-          your email.
+          🔒 Password must be 8-12 characters long
+          <br />
+          📧 Use valid email format: name@domain.com
         </p>
 
         {/* Signup link */}
-        <p
-          className="signup-link"
-          onClick={() => navigate("/signup")}
-          style={{ cursor: "pointer" }}
-        >
-          Don't have an account? Sign up
+        <p className="signup-link" onClick={() => navigate("/signup")}>
+          Don't have an account? <span>Sign up</span>
         </p>
       </div>
     </div>
