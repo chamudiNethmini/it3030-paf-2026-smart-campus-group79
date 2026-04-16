@@ -14,6 +14,7 @@ public class Notification {
 
     private boolean isRead = false;
 
+
     private LocalDateTime createdAt;
 
     public Notification() {
