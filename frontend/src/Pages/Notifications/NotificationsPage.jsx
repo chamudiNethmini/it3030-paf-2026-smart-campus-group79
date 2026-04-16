@@ -1,0 +1,107 @@
+import React, { useEffect, useState } from "react";
+import {
+  getNotifications,
+  markAsRead,
+  getUnreadCount,
+} from "../../services/notificationService";
+import Navbar from "../../Components/Navbar";
+import "./NotificationsPage.css";
+import { toast } from "react-toastify";
+
+function NotificationsPage() {
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await getNotifications();
+      const count = await getUnreadCount();
+      setNotifications(data);
+      setUnreadCount(count);
+    } catch (e) {
+      console.error("Error loading notifications:", e);
+      setError("Failed to load notifications. Please try again.");
+      toast.error("Failed to load notifications");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRead = async (id) => {
+    try {
+      await markAsRead(id);
+      toast.success("Notification marked as read");
+      loadData();
+    } catch (e) {
+      console.error("Error marking notification as read:", e);
+      toast.error("Failed to mark notification as read");
+    }
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="notifications-container">
+          <p className="status-msg">Loading notifications... ⏳</p>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <div className="notifications-container">
+          <p className="status-msg error">{error}</p>
+          <button className="retry-btn" onClick={loadData}>
+            Retry
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Navbar />
+      <div className="notifications-container">
+        <h2>
+          Notifications 🔔
+          {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
+        </h2>
+
+        {notifications.length === 0 && (
+          <p className="empty">No notifications yet ✨</p>
+        )}
+
+        {notifications.map((n) => (
+          <div
+            key={n.id}
+            className={`notification-card ${n.read ? "read" : "unread"}`}
+          >
+            <div>
+              <p>{n.message}</p>
+            </div>
+
+            {!n.read && (
+              <button onClick={() => handleRead(n.id)}>Mark as Read</button>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+export default NotificationsPage;

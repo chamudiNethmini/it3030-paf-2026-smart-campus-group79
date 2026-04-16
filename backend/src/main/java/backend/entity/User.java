@@ -18,6 +18,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private String password;
+
     // getters setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -30,4 +32,7 @@ public class User {
 
     public Role getRole() { return role; }  // return type Role
     public void setRole(Role role) { this.role = role; }  // parameter type Role
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 }

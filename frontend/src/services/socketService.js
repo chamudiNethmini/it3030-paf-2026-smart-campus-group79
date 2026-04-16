@@ -1,0 +1,24 @@
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
+
+let stompClient = null;
+
+export const connectSocket = (onMessage) => {
+  const socket = new SockJS("http://localhost:8081/ws");
+
+  stompClient = new Client({
+    webSocketFactory: () => socket,
+    reconnectDelay: 5000,
+
+    onConnect: () => {
+      console.log("Connected to WebSocket");
+
+      stompClient.subscribe("/topic/notifications", (message) => {
+        const data = JSON.parse(message.body);
+        onMessage(data);
+      });
+    },
+  });
+
+  stompClient.activate();
+};
