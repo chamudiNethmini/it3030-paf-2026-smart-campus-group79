@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 
 @RestController
@@ -25,6 +26,8 @@ public class UserController {
     @Autowired
     private NotificationRepository notificationRepository;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @PostMapping
     public User addUser(@RequestBody User user) {
@@ -34,8 +37,8 @@ public class UserController {
         notification.setMessage("New user " + savedUser.getName() + " registered");
         notificationRepository.save(notification);
 
-        // 🔥 SEND REAL-TIME
-        // messagingTemplate.convertAndSend("/topic/notifications", notification);
+        // 🔥 SEND REAL-TIME VIA WEBSOCKET
+        messagingTemplate.convertAndSend("/topic/notifications", notification);
 
         return savedUser;
     }
@@ -60,6 +63,7 @@ public class UserController {
                 String email = oAuth2User.getAttribute("email");
                 String name = oAuth2User.getAttribute("name");
 
+                // 🔥 DB eke user eka hoyagannawa - findByEmail returns User directly (not Optional)
                 User foundUser = userRepository.findByEmail(email);
 
                 String role = "USER";
@@ -110,4 +114,4 @@ public class UserController {
         throw new RuntimeException("Invalid credentials");
     }
 
-} // ✅ Class closing brace
+}
