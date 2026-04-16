@@ -1,12 +1,25 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
 
 function LoginPage() {
+  const navigate = useNavigate();
   const [hovering, setHovering] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      // Email/password login (future use)
+      navigate("/dashboard");
+    } catch (err) {
+      alert("Login failed");
+    }
+  };
 
   const handleGoogleLogin = () => {
-    // Backend OAuth2 endpoint
-    window.location.href = "http://localhost:8081/oauth2/authorization/google";
+    window.location.href =
+      "http://localhost:8081/oauth2/authorization/google?prompt=select_account&access_type=offline";
   };
 
   return (
@@ -36,6 +49,25 @@ function LoginPage() {
             Sign in to manage campus resources, bookings, and notifications.
           </p>
         </div>
+
+        {/* Email */}
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        {/* Password */}
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        {/* Login button */}
+        <button onClick={handleLogin}>Login</button>
 
         {/* Google Login Button */}
         <button
@@ -73,6 +105,15 @@ function LoginPage() {
         <p className="login-note">
           🔒 Your account role (Admin / User) is assigned automatically based on
           your email.
+        </p>
+
+        {/* Signup link */}
+        <p
+          className="signup-link"
+          onClick={() => navigate("/signup")}
+          style={{ cursor: "pointer" }}
+        >
+          Don't have an account? Sign up
         </p>
       </div>
     </div>
