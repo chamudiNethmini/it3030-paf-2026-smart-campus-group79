@@ -76,7 +76,7 @@ function NotificationsPage() {
         </h2>
         <div className="notifications-header-right">
           <button className="back-btn" onClick={() => navigate("/dashboard")}>
-            ← Back
+            ← Back to Dashboard
           </button>
         </div>
       </div>

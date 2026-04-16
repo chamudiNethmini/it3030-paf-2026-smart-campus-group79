@@ -27,14 +27,6 @@ function RoleManagement() {
       setError(null);
     } catch (err) {
       console.error("❌ Error fetching users:", err);
-      console.error("Error details:", {
-        message: err.message,
-        response: err.response,
-        status: err.response?.status,
-        data: err.response?.data,
-      });
-
-      // More specific error messages
       let errorMsg = "Failed to load users";
       if (err.response?.status === 403) {
         errorMsg = "Access denied - You don't have admin permissions";
@@ -43,7 +35,6 @@ function RoleManagement() {
       } else if (err.response?.status === 500) {
         errorMsg = "Server error - Please try again later";
       }
-
       setError(errorMsg);
       setUsers([]);
     } finally {
@@ -55,7 +46,6 @@ function RoleManagement() {
     try {
       await updateUserRole(id, role);
       alert("Role updated!");
-      // Refresh user list without full reload
       setUsers(users.map((u) => (u.id === id ? { ...u, role } : u)));
     } catch (err) {
       console.error("Error updating role:", err);
@@ -103,8 +93,9 @@ function RoleManagement() {
             <div className="role-stats">
               👥 {users.length} users · 👑 {adminCount} admin
             </div>
+            {/* ✅ Back to Dashboard button (like NotificationsPage) */}
             <button className="back-btn" onClick={() => navigate("/dashboard")}>
-              ← Back
+              ← Back to Dashboard
             </button>
           </div>
         </div>
