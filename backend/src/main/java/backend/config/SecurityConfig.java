@@ -29,9 +29,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // Public endpoints
                         .requestMatchers("/", "/login**", "/error", "/ws/**", "/oauth2/**", "/api/auth/**").permitAll()
                         .requestMatchers("/api/resources/**").permitAll()
-                        .requestMatchers("/api/users/admin/**").hasRole("ADMIN")
+                        // User endpoints: allow login and get current user publicly
+                        .requestMatchers("/api/users/login").permitAll()
+                        .requestMatchers("/api/users/me").permitAll()
+                        // All other /api/users/** endpoints require ADMIN role
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        // Any other request requires authentication
                         .anyRequest().authenticated()
                 )
                 // ✅ FORM LOGIN - email/password login
@@ -64,7 +70,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .defaultSuccessUrl("http://localhost:3001/dashboard", true)
+                        .defaultSuccessUrl("http://localhost:3001/oauth-callback", true)
                 )
                 // ✅ LOGOUT
                 .logout(logout -> logout
