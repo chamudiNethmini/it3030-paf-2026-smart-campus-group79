@@ -6,26 +6,25 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import LoginPage from "./Pages/Login/LoginPage";
+import SignupPage from "./Pages/Login/SignupPage";
+import Dashboard from "./Pages/Dashboard/Dashboard";
 import FacilitiesPage from "./Pages/Facilities/FacilitiesPage";
 import AddResource from "./Pages/Admin/AddResource";
 import BookingPage from "./Pages/Booking/BookingPage";
-import UserDashboard from "./Pages/Booking/UserDashboard";
 import ManageBookings from "./Pages/Admin/ManageBookings";
 import NotificationsPage from "./Pages/Notifications/NotificationsPage";
-import SignupPage from "./Pages/Login/SignupPage";
-import Dashboard from "./Pages/Dashboard/Dashboard";
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Public routes */}
+          {/* PUBLIC ROUTES */}
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
-
           <Route path="/signup" element={<SignupPage />} />
 
+          {/* PROTECTED USER ROUTES */}
           <Route
             path="/dashboard"
             element={
@@ -35,24 +34,34 @@ function App() {
             }
           />
 
-          {/* User routes */}
           <Route
-            path="/dashboard"
+            path="/facilities"
             element={
               <ProtectedRoute>
-                <UserDashboard />
+                <FacilitiesPage />
               </ProtectedRoute>
             }
           />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/facilities" element={<FacilitiesPage />} />
-          <Route path="/bookings" element={<BookingPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/facilities" element={<FacilitiesPage />} />
-          <Route path="/bookings" element={<BookingPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
 
-          {/* Admin routes */}
+          <Route
+            path="/bookings"
+            element={
+              <ProtectedRoute>
+                <BookingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ADMIN ROUTES */}
           <Route
             path="/admin/add-resource"
             element={
@@ -61,6 +70,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/admin/bookings"
             element={
