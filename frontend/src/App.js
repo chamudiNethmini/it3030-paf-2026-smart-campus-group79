@@ -7,12 +7,15 @@ import "react-toastify/dist/ReactToastify.css";
 
 import LoginPage from "./Pages/Login/LoginPage";
 import SignupPage from "./Pages/Login/SignupPage";
+import OAuthCallback from "./Pages/OAuthCallback";
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import FacilitiesPage from "./Pages/Facilities/FacilitiesPage";
 import AddResource from "./Pages/Admin/AddResource";
 import BookingPage from "./Pages/Booking/BookingPage";
 import ManageBookings from "./Pages/Admin/ManageBookings";
 import NotificationsPage from "./Pages/Notifications/NotificationsPage";
+import Profile from "./Pages/Profile/Profile";
+import AdminRolesPage from "./Pages/Admin/AdminRolesPage";
 
 function App() {
   return (
@@ -23,6 +26,7 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/oauth-callback" element={<OAuthCallback />} />
 
           {/* PROTECTED USER ROUTES */}
           <Route
@@ -61,6 +65,15 @@ function App() {
             }
           />
 
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
           {/* ADMIN ROUTES */}
           <Route
             path="/admin/add-resource"
@@ -76,6 +89,15 @@ function App() {
             element={
               <ProtectedRoute role="ADMIN">
                 <ManageBookings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/roles"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <AdminRolesPage />
               </ProtectedRoute>
             }
           />
