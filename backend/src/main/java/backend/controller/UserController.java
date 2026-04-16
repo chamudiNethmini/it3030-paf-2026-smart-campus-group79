@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -24,14 +25,17 @@ public class UserController {
     @Autowired
     private NotificationRepository notificationRepository;
 
+
     @PostMapping
     public User addUser(@RequestBody User user) {
         User savedUser = userService.saveUser(user);
 
-        // 🔔 Notification create කරනවා
         Notification notification = new Notification();
         notification.setMessage("New user " + savedUser.getName() + " registered");
         notificationRepository.save(notification);
+
+        // 🔥 SEND REAL-TIME
+        // messagingTemplate.convertAndSend("/topic/notifications", notification);
 
         return savedUser;
     }
@@ -41,11 +45,37 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    // ✅ NEW - current logged user (FIXED: missing closing brace)
+    // ✅ Current logged user with email, name and role
     @GetMapping("/me")
-    public Object getCurrentUser(Authentication authentication) {
-        return authentication.getPrincipal();
-    }  // ← මෙතන closing brace එක තිබුණේ නැහැ
+    public Map<String, Object> getCurrentUser(Authentication authentication) {
+
+        Map<String, Object> userData = new HashMap<>();
+
+        if (authentication != null && authentication.getPrincipal() != null) {
+
+            Object principal = authentication.getPrincipal();
+
+            if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oAuth2User) {
+
+                String email = oAuth2User.getAttribute("email");
+                String name = oAuth2User.getAttribute("name");
+
+                User foundUser = userRepository.findByEmail(email);
+
+                String role = "USER";
+
+                if (foundUser != null) {
+                    role = foundUser.getRole().name();
+                }
+
+                userData.put("email", email);
+                userData.put("name", name);
+                userData.put("role", role);
+            }
+        }
+
+        return userData;
+    }
 
     @GetMapping("/admin")
     public String adminOnly() {
@@ -66,4 +96,18 @@ public class UserController {
 
         return "User not found!";
     }
-}
+
+    // ✅ Login endpoint - merged into class
+    @PostMapping("/login")
+    public User login(@RequestBody User user) {
+
+        User existingUser = userRepository.findByEmail(user.getEmail());
+
+        if (existingUser != null && existingUser.getPassword().equals(user.getPassword())) {
+            return existingUser;
+        }
+
+        throw new RuntimeException("Invalid credentials");
+    }
+
+} // ✅ Class closing brace
