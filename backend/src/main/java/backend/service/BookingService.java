@@ -4,8 +4,14 @@ import backend.dto.BookingRequest;
 import backend.dto.BookingResponse;
 import backend.dto.BookingStatusUpdateRequest;
 import backend.entity.Booking;
+import backend.entity.Notification;
+import backend.entity.User;
 import backend.enumtype.BookingStatus;
 import backend.repository.BookingRepository;
+import backend.repository.NotificationRepository;
+import backend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +21,15 @@ import java.util.stream.Collectors;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public BookingService(BookingRepository bookingRepository) {
         this.bookingRepository = bookingRepository;
@@ -90,6 +105,7 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
 
+        BookingStatus oldStatus = booking.getStatus();
         booking.setStatus(request.getStatus());
 
         if (request.getStatus() == BookingStatus.REJECTED) {
@@ -99,6 +115,42 @@ public class BookingService {
         }
 
         Booking updatedBooking = bookingRepository.save(booking);
+
+        // 🔔 SEND NOTIFICATION TO USER ON STATUS CHANGE
+        String notifMessage = "";
+        String notifType = "";
+
+        switch (request.getStatus()) {
+            case APPROVED:
+                notifMessage = "✅ Your booking #" + id + " has been APPROVED!";
+                notifType = "BOOKING_APPROVED";
+                break;
+            case REJECTED:
+                notifMessage = "❌ Your booking #" + id + " has been REJECTED. Reason: " + request.getAdminReason();
+                notifType = "BOOKING_REJECTED";
+                break;
+            case CANCELLED:
+                notifMessage = "⚠️ Your booking #" + id + " has been CANCELLED";
+                notifType = "BOOKING_CANCELLED";
+                break;
+            default:
+                notifMessage = "📢 Your booking #" + id + " status changed to " + request.getStatus();
+                notifType = "BOOKING_UPDATED";
+        }
+
+        // Get user and create notification
+        User user = userRepository.findByEmail(booking.getUserEmail());
+        if (user != null) {
+            Notification notif = new Notification(notifMessage, notifType, user.getId());
+            notif.setBookingId(id);
+            Notification savedNotif = notificationRepository.save(notif);
+
+            // Send via WebSocket
+            messagingTemplate.convertAndSend("/topic/notifications", savedNotif);
+
+            System.out.println("🔔 Booking notification sent: " + notifMessage);
+        }
+
         return mapToResponse(updatedBooking);
     }
 

@@ -32,19 +32,23 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             newUser.setName(name);
             newUser.setEmail(email);
 
-            // default role USER
-            Role userRole = Role.USER;
+            // ✅ Auto-assign roles based on email patterns (customizable)
+            Role assignedRole = Role.USER;  // Default role
 
-            // admin email check - testing
+            // Admin list
             if (email.equals("gayanthawannisekara@gmail.com")) {
-                userRole = Role.ADMIN;
+                assignedRole = Role.ADMIN;
+            }
+            // Technician list (can expand)
+            else if (email.endsWith("@technicians.com") || email.equals("tech@campus.edu")) {
+                assignedRole = Role.TECHNICIAN;
             }
 
-            newUser.setRole(userRole);
+            newUser.setRole(assignedRole);
             existingUser = userRepository.save(newUser);
-            System.out.println("✅ New OAuth user created: " + email + " with role: " + userRole);
+            System.out.println("✅ New OAuth user created: " + email + " with role: " + assignedRole);
         } else {
-            // Update existing user's role if needed
+            // Update role if admin email
             if (email.equals("gayanthawannisekara@gmail.com") && existingUser.getRole() != Role.ADMIN) {
                 existingUser.setRole(Role.ADMIN);
                 userRepository.save(existingUser);
@@ -55,11 +59,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 🔥 SET PROPER AUTHORITIES BASED ON ROLE
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        
+
         // Add role authority (Spring expects "ROLE_" prefix)
         String roleAuthority = "ROLE_" + existingUser.getRole().name();
         authorities.add(new SimpleGrantedAuthority(roleAuthority));
-        
+
         System.out.println("🔐 Setting authority: " + roleAuthority + " for user: " + email);
 
         // Return new OAuth2User with updated authorities
