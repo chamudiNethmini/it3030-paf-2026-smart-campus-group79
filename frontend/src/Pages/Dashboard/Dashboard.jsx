@@ -9,7 +9,8 @@ function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/login";
+    localStorage.removeItem("user");
+    window.location.href = "/";
   };
 
   return (
