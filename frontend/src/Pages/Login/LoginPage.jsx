@@ -13,6 +13,10 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const getRedirectPathByRole = (role) => {
+    return "/dashboard";
+  };
+
   // ✅ Enhanced Email validation function
   const isValidEmail = (email) => {
     // More strict email regex
@@ -93,7 +97,7 @@ function LoginPage() {
         const userData = await getCurrentUser();
         setUser(userData);
         localStorage.setItem("user", JSON.stringify(userData));
-        navigate("/dashboard");
+        navigate(getRedirectPathByRole(userData?.role));
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Invalid email or password");
