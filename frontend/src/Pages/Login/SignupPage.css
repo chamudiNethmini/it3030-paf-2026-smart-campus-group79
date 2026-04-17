@@ -1,0 +1,311 @@
+/* SignupPage.css */
+
+/* ===== SIGNUP PAGE ===== */
+.signup-page {
+  min-height: 100vh;
+  background: #060e1f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* ===== BACKGROUND BLOBS ===== */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+  animation: floatBlob 8s ease-in-out infinite;
+  pointer-events: none;
+}
+.blob-1 {
+  width: 500px;
+  height: 500px;
+  background: #3b82f6;
+  top: -100px;
+  left: -150px;
+  animation-delay: 0s;
+}
+.blob-2 {
+  width: 400px;
+  height: 400px;
+  background: #1d4ed8;
+  bottom: -80px;
+  right: -100px;
+  animation-delay: 3s;
+}
+.blob-3 {
+  width: 300px;
+  height: 300px;
+  background: #60a5fa;
+  top: 50%;
+  left: 50%;
+  animation: floatBlob3 8s ease-in-out infinite;
+  animation-delay: 5s;
+}
+@keyframes floatBlob {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-28px) scale(1.05);
+  }
+}
+@keyframes floatBlob3 {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, calc(-50% - 20px)) scale(1.05);
+  }
+}
+
+/* ===== CARD ===== */
+.signup-card {
+  position: relative;
+  z-index: 10;
+  background: rgba(10, 25, 60, 0.78);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 48px 44px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  animation: cardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== LOGO ===== */
+.signup-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.signup-logo-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 15px;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+}
+.signup-logo-text h1 {
+  margin: 0;
+  color: white;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.signup-logo-text p {
+  margin: 3px 0 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+/* ===== DIVIDER ===== */
+.signup-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 24px;
+}
+
+/* ===== WELCOME ===== */
+.signup-welcome {
+  margin-bottom: 24px;
+}
+.signup-welcome h2 {
+  margin: 0 0 6px;
+  color: white;
+  font-size: 24px;
+  font-weight: 800;
+}
+.signup-welcome p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ===== INPUTS ===== */
+.signup-input {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+.signup-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+.signup-input:focus {
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+/* ===== SIGNUP BUTTON ===== */
+.signup-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+}
+.signup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.45);
+}
+.signup-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== OR DIVIDER ===== */
+.signup-or {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  position: relative;
+}
+.signup-or::before,
+.signup-or::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 42%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.signup-or::before {
+  left: 0;
+}
+.signup-or::after {
+  right: 0;
+}
+
+/* ===== GOOGLE BUTTON ===== */
+.signup-google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 13px 20px;
+  background: white;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+.signup-google-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+  background: #f0f6ff;
+}
+.google-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ===== NOTE ===== */
+.signup-note {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+/* ===== LOGIN LINK ===== */
+.login-link {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  cursor: pointer;
+  margin: 0;
+}
+.login-link span {
+  color: #60a5fa;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.login-link:hover span {
+  color: #93c5fd;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .signup-card {
+    margin: 16px;
+    padding: 36px 24px;
+  }
+}
+
+/* ===== ERROR MESSAGE ===== */
+.signup-error {
+  background: rgba(220, 38, 38, 0.2);
+  border: 1px solid rgba(220, 38, 38, 0.5);
+  color: #ef4444;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+/* ===== ERROR INPUT STYLE ===== */
+.signup-input.error {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.signup-input.error:focus {
+  border-color: #ef4444;
+}

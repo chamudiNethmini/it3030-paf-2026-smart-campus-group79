@@ -1,9 +1,36 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import "./Navbar.css";
+import { useEffect, useState } from "react";
+import { getUnreadCount } from "../services/notificationService";
+import { connectSocket } from "../services/socketService";
+import { toast } from "react-toastify";
 
 function Navbar() {
   const location = useLocation();
+  const { user } = useContext(AuthContext);
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    loadUnread();
+
+    const interval = setInterval(loadUnread, 5000);
+
+    connectSocket((notification) => {
+      toast.info(notification.message);
+      setUnread((prev) => prev + 1);
+    });
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  const loadUnread = async () => {
+    const count = await getUnreadCount();
+    setUnread(count);
+  };
 
   return (
     <div className="navbar-wrapper">
@@ -17,30 +44,93 @@ function Navbar() {
         </div>
 
         <div className="navbar-center">
-          <Link
-            to="/bookings"
-            className={location.pathname === "/bookings" ? "active-link" : ""}
-          >
-            Book Resource
-          </Link>
-          <Link
-            to="/dashboard"
-            className={location.pathname === "/dashboard" ? "active-link" : ""}
-          >
-            My Bookings
-          </Link>
-          <Link
-            to="/admin/bookings"
-            className={location.pathname === "/admin/bookings" ? "active-link" : ""}
-          >
-            Manage Bookings
-          </Link>
+          {/* USER & ADMIN links */}
+          {(user?.role === "USER" || user?.role === "ADMIN") && (
+            <>
+              <Link
+                to="/bookings"
+                className={
+                  location.pathname === "/bookings" ? "active-link" : ""
+                }
+              >
+                Book Resource
+              </Link>
+              <Link
+                to="/dashboard"
+                className={
+                  location.pathname === "/dashboard" ? "active-link" : ""
+                }
+              >
+                My Bookings
+              </Link>
+              {location.pathname !== "/bookings" && (
+                <Link
+                  to="/notifications"
+                  className={
+                    location.pathname === "/notifications" ? "active-link" : ""
+                  }
+                >
+                  Notifications{" "}
+                  {unread > 0 && (
+                    <span style={{ color: "red" }}>({unread})</span>
+                  )}
+                </Link>
+              )}
+            </>
+          )}
+
+          {/* ADMIN ONLY links - Hide from BookingPage */}
+          {user?.role === "ADMIN" && location.pathname !== "/bookings" && (
+            <>
+              <Link
+                to="/admin/bookings"
+                className={
+                  location.pathname === "/admin/bookings" ? "active-link" : ""
+                }
+              >
+                Manage Bookings
+              </Link>
+              <Link
+                to="/admin/roles"
+                className={
+                  location.pathname === "/admin/roles" ? "active-link" : ""
+                }
+              >
+                Manage Roles
+              </Link>
+            </>
+          )}
         </div>
 
         <div className="navbar-right">
-          <Link to="/admin/bookings" className="navbar-btn">
-            Admin
-          </Link>
+          {!user && (
+            <Link to="/login" className="navbar-btn">
+              Login
+            </Link>
+          )}
+
+          {user?.role === "ADMIN" && (
+            <Link to="/admin/bookings" className="navbar-btn">
+              Admin
+            </Link>
+          )}
+
+          {user?.role === "ADMIN" && <Link to="/admin/roles">Admin Roles</Link>}
+
+          {user && <span className="user-email">{user.email}</span>}
+
+          {user && (
+            <Link
+              to="/login"
+              className="navbar-btn logout-btn"
+              onClick={() => {
+                localStorage.removeItem("token");
+                window.location.href = "/login";
+              }}
+            >
+              Logout
+            </Link>
+          )}
         </div>
       </nav>
     </div>

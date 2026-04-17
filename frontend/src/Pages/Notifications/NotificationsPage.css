@@ -1,0 +1,194 @@
+/* ===== NOTIFICATIONS PAGE ===== */
+
+.notifications-page {
+  min-height: 100vh;
+  background: #f4f7fb;
+  padding: 40px 20px;
+}
+
+.notifications-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-top: 30px;
+}
+
+/* ===== HEADER WITH BACK BUTTON ===== */
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.notifications-header h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notifications-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-btn {
+  padding: 10px 20px;
+  background: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.back-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* ===== HEADING ===== */
+.notifications-header h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ===== UNREAD BADGE ===== */
+.badge {
+  background: #dc2626;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 999px;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* ===== STATUS MESSAGES ===== */
+.status-msg {
+  text-align: center;
+  color: #6b7280;
+  font-size: 15px;
+  margin-top: 40px;
+}
+
+.status-msg.error {
+  color: #dc2626;
+}
+
+/* ===== RETRY BUTTON ===== */
+.retry-btn {
+  display: block;
+  margin: 16px auto 0;
+  padding: 10px 24px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: #1d4ed8;
+}
+
+/* ===== EMPTY STATE ===== */
+.empty {
+  text-align: center;
+  color: #6b7280;
+  margin-top: 30px;
+  font-size: 15px;
+}
+
+/* ===== NOTIFICATION CARD ===== */
+.notification-card {
+  background: white;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-left: 4px solid transparent;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.notification-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.11);
+  transform: translateY(-2px);
+}
+
+/* Unread — blue left border + light blue tint */
+.notification-card.unread {
+  border-left-color: #2563eb;
+  background: #eff6ff;
+}
+
+/* Read — grey left border + normal white */
+.notification-card.read {
+  border-left-color: #d1d5db;
+  opacity: 0.7;
+}
+
+/* ===== NOTIFICATION TEXT ===== */
+.notification-card p {
+  margin: 0;
+  color: #1f2937;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.notification-card.read p {
+  color: #6b7280;
+}
+
+/* ===== MARK AS READ BUTTON ===== */
+.notification-card button {
+  padding: 8px 16px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.notification-card button:hover {
+  background: #1d4ed8;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .notification-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .notification-card button {
+    width: 100%;
+    text-align: center;
+  }
+}
