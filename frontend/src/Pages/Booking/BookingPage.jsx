@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { createBooking } from "../../services/bookingService";
-import Navbar from "../../Components/Navbar";
+import Navbar from "../../components/Navbar";
 import "./BookingPage.css";
 
 function BookingPage() {

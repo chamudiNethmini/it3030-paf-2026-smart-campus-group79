@@ -1,76 +1,157 @@
 package backend.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "tickets")
 public class Ticket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String subject;
-    private String message;
+    // matches: resource_location
+    @Column(name = "resource_location", nullable = false)
+    private String resourceLocation;
 
-    private String attachmentName;
-    private String attachmentType;
+    private String category;
 
-    @Lob
-    private byte[] attachmentData;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    private String adminReply;
+    // matches: contact_details
+    @Column(name = "contact_details")
+    private String contactDetails;
 
-    // ===== GETTERS & SETTERS =====
+    @Column(name = "assigned_to")
+    private String assignedTo;
+
+    @Column(name = "resolution_notes", columnDefinition = "TEXT")
+    private String resolutionNotes;
+
+    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    private String rejectionReason;
+
+    @Column(name = "created_by")
+    private String createdBy;
+
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.OPEN;
+
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
+
+    // Attachments table mapping
+    @ElementCollection
+    @CollectionTable(
+            name = "ticket_attachments",
+            joinColumns = @JoinColumn(name = "ticket_id")
+    )
+    @Column(name = "image_url")
+    private List<String> attachments = new ArrayList<>();
+
+    // Enums
+    public enum Status {
+        OPEN, IN_PROGRESS, RESOLVED, CLOSED, REJECTED
+    }
+
+    public enum Priority {
+        LOW, MEDIUM, HIGH, URGENT
+    }
+
+    // ================= GETTERS & SETTERS =================
 
     public Long getId() {
         return id;
     }
 
-    public String getSubject() {
-        return subject;
+    public String getResourceLocation() {
+        return resourceLocation;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
+    public void setResourceLocation(String resourceLocation) {
+        this.resourceLocation = resourceLocation;
     }
 
-    public String getMessage() {
-        return message;
+    public String getCategory() {
+        return category;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
-    public String getAttachmentName() {
-        return attachmentName;
+    public String getDescription() {
+        return description;
     }
 
-    public void setAttachmentName(String attachmentName) {
-        this.attachmentName = attachmentName;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getAttachmentType() {
-        return attachmentType;
+    public String getContactDetails() {
+        return contactDetails;
     }
 
-    public void setAttachmentType(String attachmentType) {
-        this.attachmentType = attachmentType;
+    public void setContactDetails(String contactDetails) {
+        this.contactDetails = contactDetails;
     }
 
-    public byte[] getAttachmentData() {
-        return attachmentData;
+    public String getAssignedTo() {
+        return assignedTo;
     }
 
-    public void setAttachmentData(byte[] attachmentData) {
-        this.attachmentData = attachmentData;
+    public void setAssignedTo(String assignedTo) {
+        this.assignedTo = assignedTo;
     }
 
-    public String getAdminReply() {
-        return adminReply;
+    public String getResolutionNotes() {
+        return resolutionNotes;
     }
 
-    public void setAdminReply(String adminReply) {
-        this.adminReply = adminReply;
+    public void setResolutionNotes(String resolutionNotes) {
+        this.resolutionNotes = resolutionNotes;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
+    public List<String> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<String> attachments) {
+        this.attachments = attachments;
     }
 }

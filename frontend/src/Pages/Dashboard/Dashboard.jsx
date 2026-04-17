@@ -30,7 +30,7 @@ function Dashboard() {
           <li onClick={() => navigate("/bookings")} className="menu-item">
             📅 Bookings
           </li>
-          <li onClick={() => navigate("/notifications")} className="menu-item">
+          <li onClick={() => navigate("/tickets")} className="menu-item">
             🎫 Tickets
           </li>
           <li onClick={() => navigate("/notifications")} className="menu-item">
