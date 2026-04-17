@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import LoginPage from "./Pages/Login/LoginPage";
 import SignupPage from "./Pages/Login/SignupPage";
 import OAuthCallback from "./Pages/OAuthCallback";
+import LandingPage from "./Pages/Landing/LandingPage";
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import FacilitiesPage from "./Pages/Facilities/FacilitiesPage";
 import AddResource from "./Pages/Admin/AddResource";
@@ -23,7 +24,7 @@ function App() {
       <Router>
         <Routes>
           {/* PUBLIC ROUTES */}
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
