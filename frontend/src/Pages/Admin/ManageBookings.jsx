@@ -22,8 +22,15 @@ function ManageBookings() {
   const fetchBookings = async () => {
     try {
       const response = await getAllBookings();
-      setBookings(response.data);
-      setError("");
+      const payload = response?.data;
+      if (Array.isArray(payload)) {
+        setBookings(payload);
+        setError("");
+        return;
+      }
+
+      setBookings([]);
+      setError("Unexpected response while loading bookings. Please login again.");
     } catch (err) {
       console.error("Error fetching bookings:", err);
       setError("Failed to load bookings");
@@ -70,10 +77,12 @@ function ManageBookings() {
     }
   };
 
+  const safeBookings = Array.isArray(bookings) ? bookings : [];
+
   const filteredBookings =
     statusFilter === "ALL"
-      ? bookings
-      : bookings.filter((booking) => booking.status === statusFilter);
+      ? safeBookings
+      : safeBookings.filter((booking) => booking.status === statusFilter);
 
   return (
     <>

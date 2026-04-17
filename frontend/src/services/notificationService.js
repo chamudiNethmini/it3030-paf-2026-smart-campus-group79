@@ -1,7 +1,9 @@
 const BASE_URL = "http://localhost:8081/api/notifications";
 
 export const getNotifications = async () => {
-  return fetch(BASE_URL, { credentials: "include" }).then((res) => res.json());
+  return fetch(`${BASE_URL}/user`, { credentials: "include" }).then((res) =>
+    res.json(),
+  );
 };
 
 export const markAsRead = async (id) => {
@@ -12,7 +14,7 @@ export const markAsRead = async (id) => {
 };
 
 export const getUnreadCount = async () => {
-  return fetch(`${BASE_URL}/unread`, {
+  return fetch(`${BASE_URL}/user/unread`, {
     credentials: "include",
   }).then((res) => res.json());
 };

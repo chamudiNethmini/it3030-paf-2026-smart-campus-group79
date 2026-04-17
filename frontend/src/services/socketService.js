@@ -18,7 +18,17 @@ export const connectSocket = (onMessage) => {
         onMessage(data);
       });
     },
+    onStompError: (frame) => {
+      console.error("WebSocket STOMP error:", frame);
+    },
   });
 
   stompClient.activate();
+};
+
+export const disconnectSocket = () => {
+  if (stompClient) {
+    stompClient.deactivate();
+    stompClient = null;
+  }
 };

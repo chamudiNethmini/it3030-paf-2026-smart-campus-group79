@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getNotifications,
@@ -7,9 +7,12 @@ import {
 } from "../../services/notificationService";
 import "./NotificationsPage.css";
 import { toast } from "react-toastify";
+import { AuthContext } from "../../context/AuthContext";
+import { connectSocket, disconnectSocket } from "../../services/socketService";
 
 function NotificationsPage() {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -18,6 +21,22 @@ function NotificationsPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) {
+      return undefined;
+    }
+
+    connectSocket((notification) => {
+      if (notification.userId === user.id) {
+        loadData();
+      }
+    });
+
+    return () => {
+      disconnectSocket();
+    };
+  }, [user?.id]);
 
   const loadData = async () => {
     setLoading(true);
