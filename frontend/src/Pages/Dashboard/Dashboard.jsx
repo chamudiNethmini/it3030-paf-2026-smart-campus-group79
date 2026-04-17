@@ -6,6 +6,14 @@ import { useNavigate } from "react-router-dom";
 function Dashboard() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const role = user?.role || "USER";
+  const roleClass = role.toLowerCase();
+
+  const dashboardTitleByRole = {
+    ADMIN: "Admin Dashboard",
+    TECHNICIAN: "Technician Dashboard",
+    USER: "User Dashboard",
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -14,11 +22,12 @@ function Dashboard() {
   };
 
   return (
-    <div className="dashboard">
+    <div className={`dashboard dashboard-${roleClass}`}>
       {/* Sidebar */}
       <div className="sidebar">
         <div className="sidebar-header">
           <h2>Smart Campus</h2>
+          <p className="sidebar-role">{role}</p>
         </div>
 
         <ul className="sidebar-menu">
@@ -65,7 +74,7 @@ function Dashboard() {
         {/* Top Header with User Profile */}
         <div className="top-header">
           <div className="header-title">
-            <h1>Dashboard</h1>
+            <h1>{dashboardTitleByRole[role] || "Dashboard"}</h1>
           </div>
           <div className="user-profile">
             <div className="user-info">

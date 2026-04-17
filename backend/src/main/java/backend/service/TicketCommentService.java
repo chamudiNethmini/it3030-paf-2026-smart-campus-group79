@@ -78,6 +78,6 @@ public class TicketCommentService {
         Notification notification = new Notification(message, "TICKET_COMMENT", user.getId());
         notification.setTicketId(ticketId);
         Notification savedNotification = notificationRepository.save(notification);
-        messagingTemplate.convertAndSend("/topic/notifications", savedNotification);
+        messagingTemplate.convertAndSend("/topic/notifications/" + user.getId(), savedNotification);
     }
 }

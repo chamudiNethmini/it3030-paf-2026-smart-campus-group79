@@ -27,10 +27,8 @@ function NotificationsPage() {
       return undefined;
     }
 
-    connectSocket((notification) => {
-      if (notification.userId === user.id) {
-        loadData();
-      }
+    connectSocket(user.id, () => {
+      loadData();
     });
 
     return () => {

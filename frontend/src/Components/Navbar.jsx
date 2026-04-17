@@ -17,11 +17,9 @@ function Navbar() {
 
     const interval = setInterval(loadUnread, 5000);
 
-    connectSocket((notification) => {
-      if (user?.id && notification?.userId === user.id) {
-        toast.info(notification.message);
-        setUnread((prev) => prev + 1);
-      }
+    connectSocket(user?.id, (notification) => {
+      toast.info(notification.message);
+      setUnread((prev) => prev + 1);
     });
 
     return () => {

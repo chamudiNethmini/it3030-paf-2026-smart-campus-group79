@@ -3,7 +3,6 @@ package backend.service;
 import backend.entity.Notification;
 import backend.entity.Ticket;
 import backend.entity.Ticket.TicketStatus;
-import backend.entity.Ticket.TicketPriority;
 import backend.entity.User;
 import backend.repository.NotificationRepository;
 import backend.repository.TicketRepository;
@@ -47,7 +46,7 @@ public class TicketService {
         );
         notif.setTicketId(savedTicket.getId());
         Notification savedNotif = notificationRepository.save(notif);
-        messagingTemplate.convertAndSend("/topic/notifications", savedNotif);
+        sendUserNotification(savedNotif);
 
         System.out.println("✅ Ticket created: " + savedTicket.getId() + " - " + ticket.getTitle());
         return savedTicket;
@@ -93,7 +92,7 @@ public class TicketService {
         );
         notif.setTicketId(ticketId);
         Notification savedNotif = notificationRepository.save(notif);
-        messagingTemplate.convertAndSend("/topic/notifications", savedNotif);
+        sendUserNotification(savedNotif);
 
         // 🔔 Notify reporter
         Notification reporterNotif = new Notification(
@@ -103,7 +102,7 @@ public class TicketService {
         );
         reporterNotif.setTicketId(ticketId);
         Notification savedReporterNotif = notificationRepository.save(reporterNotif);
-        messagingTemplate.convertAndSend("/topic/notifications", savedReporterNotif);
+        sendUserNotification(savedReporterNotif);
 
         System.out.println("🔧 Ticket #" + ticketId + " assigned to " + technicianEmail);
         return updated;
@@ -148,7 +147,7 @@ public class TicketService {
         Notification notif = new Notification(notifMessage, notifType, getUserIdByEmail(ticket.getReportedByEmail()));
         notif.setTicketId(ticketId);
         Notification savedNotif = notificationRepository.save(notif);
-        messagingTemplate.convertAndSend("/topic/notifications", savedNotif);
+        sendUserNotification(savedNotif);
 
         System.out.println("🔄 Ticket #" + ticketId + " status: " + oldStatus + " → " + newStatus);
         return updated;
@@ -172,5 +171,12 @@ public class TicketService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private void sendUserNotification(Notification notification) {
+        if (notification.getUserId() == null) {
+            return;
+        }
+        messagingTemplate.convertAndSend("/topic/notifications/" + notification.getUserId(), notification);
     }
 }
