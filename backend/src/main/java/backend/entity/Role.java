@@ -2,5 +2,6 @@ package backend.entity;
 
 public enum Role {
     ADMIN,
-    USER
+    USER,
+    TECHNICIAN
 }
