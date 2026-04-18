@@ -150,6 +150,15 @@
     font-size: 0.9rem;
 }
 
+.ticket-reply textarea {
+    width: 100%;
+    min-height: 70px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.4rem 0.5rem;
+    margin-top: 0.3rem;
+}
+
 .ticket-reply-meta {
     color: #5b6b7f;
     font-size: 0.75rem;
@@ -169,6 +178,47 @@
     border-radius: 6px;
     padding: 0.45rem 0.5rem;
     font-size: 0.9rem;
+}
+
+.ticket-comment-actions {
+    margin-top: 0.4rem;
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.tickets-btn-light {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.tickets-btn-danger {
+    background: #ef4444;
+    color: #fff;
+}
+
+.ticket-staff-box {
+    margin-top: 0.6rem;
+    padding: 0.55rem;
+    border: 1px dashed #d0d7e2;
+    border-radius: 8px;
+    background: #fafcff;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.ticket-staff-box label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #444;
+}
+
+.ticket-staff-box input,
+.ticket-staff-box select {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.4rem 0.5rem;
 }
 
 /* Page background */

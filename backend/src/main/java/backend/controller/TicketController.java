@@ -48,6 +48,9 @@ public class TicketController {
         if (actor.getRole() == Role.ADMIN) {
             return ticketRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         }
+        if (actor.getRole() == Role.TECHNICIAN) {
+            return ticketService.getMyTickets(actor.getEmail());
+        }
         return ticketRepository.findByCreatedByOrderByIdDesc(actor.getEmail());
     }
 
@@ -99,6 +102,40 @@ public class TicketController {
 
         TicketComment comment = ticketCommentService.addComment(id, auth.getName(), message.trim());
         return new ResponseEntity<>(comment, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}/comments/{commentId}")
+    public ResponseEntity<?> updateTicketComment(
+            @PathVariable Long id,
+            @PathVariable Long commentId,
+            @RequestBody Map<String, String> request,
+            Authentication auth
+    ) {
+        String message = request.get("message");
+        if (message == null || message.isBlank()) {
+            return ResponseEntity.badRequest().body("Comment message is required");
+        }
+        try {
+            TicketComment updated = ticketCommentService.updateComment(id, commentId, auth.getName(), message.trim());
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}/comments/{commentId}")
+    public ResponseEntity<?> deleteTicketComment(
+            @PathVariable Long id,
+            @PathVariable Long commentId,
+            Authentication authentication
+    ) {
+        User actor = requireActor(authentication);
+        try {
+            ticketCommentService.deleteComment(id, commentId, actor.getEmail(), actor.getRole() == Role.ADMIN);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+        }
     }
 
     @PostMapping("/submit")
@@ -154,9 +191,18 @@ public class TicketController {
      */
     @PutMapping("/{id}/assign")
     public ResponseEntity<Ticket> assignTicket(
+            Authentication authentication,
             @PathVariable Long id,
             @RequestParam String technicianEmail
     ) {
+        User actor = requireActor(authentication);
+        if (actor.getRole() != Role.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin can assign technician");
+        }
+        User technician = userRepository.findByEmail(technicianEmail);
+        if (technician == null || technician.getRole() != Role.TECHNICIAN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selected email is not a technician");
+        }
         Ticket assigned = ticketService.assignTicket(id, technicianEmail);
         return ResponseEntity.ok(assigned);
     }
@@ -166,10 +212,15 @@ public class TicketController {
      */
     @PutMapping("/{id}/status")
     public ResponseEntity<Ticket> updateTicketStatus(
+            Authentication authentication,
             @PathVariable Long id,
             @RequestParam String status,
             @RequestParam(required = false) String resolution
     ) {
+        User actor = requireActor(authentication);
+        if (actor.getRole() != Role.ADMIN && actor.getRole() != Role.TECHNICIAN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only staff can update status");
+        }
         Ticket updated = ticketService.updateTicketStatus(id, status, resolution);
         return ResponseEntity.ok(updated);
     }

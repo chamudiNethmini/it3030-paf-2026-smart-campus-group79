@@ -12,6 +12,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TicketCommentService {
@@ -52,6 +53,25 @@ public class TicketCommentService {
 
         notifyTicketParties(ticket, commenterEmail, message);
         return savedComment;
+    }
+
+    public TicketComment updateComment(Long ticketId, Long commentId, String actorEmail, String message) {
+        TicketComment comment = ticketCommentRepository.findByIdAndTicketId(commentId, ticketId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        if (!Objects.equals(comment.getCommenterEmail(), actorEmail)) {
+            throw new RuntimeException("You can edit only your own comments");
+        }
+        comment.setMessage(message);
+        return ticketCommentRepository.save(comment);
+    }
+
+    public void deleteComment(Long ticketId, Long commentId, String actorEmail, boolean isAdmin) {
+        TicketComment comment = ticketCommentRepository.findByIdAndTicketId(commentId, ticketId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        if (!isAdmin && !Objects.equals(comment.getCommenterEmail(), actorEmail)) {
+            throw new RuntimeException("You can delete only your own comments");
+        }
+        ticketCommentRepository.delete(comment);
     }
 
     private void notifyTicketParties(Ticket ticket, String commenterEmail, String message) {
