@@ -17,4 +17,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     // 🎟️ Find notifications related to specific booking/ticket
     List<Notification> findByBookingIdOrderByCreatedAtDesc(Long bookingId);
     List<Notification> findByTicketIdOrderByCreatedAtDesc(Long ticketId);
+
+    java.util.Optional<Notification> findByIdAndUserId(Long id, Long userId);
 }

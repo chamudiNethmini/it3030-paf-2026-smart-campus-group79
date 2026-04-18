@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import "./Navbar.css";
 import { useEffect, useState } from "react";
 import { getUnreadCount } from "../services/notificationService";
-import { connectSocket } from "../services/socketService";
+import { connectSocket, disconnectSocket } from "../services/socketService";
 import { toast } from "react-toastify";
 
 function Navbar() {
@@ -17,19 +17,24 @@ function Navbar() {
 
     const interval = setInterval(loadUnread, 5000);
 
-    connectSocket((notification) => {
+    connectSocket(user?.id, (notification) => {
       toast.info(notification.message);
       setUnread((prev) => prev + 1);
     });
 
     return () => {
       clearInterval(interval);
+      disconnectSocket();
     };
-  }, []);
+  }, [user?.id]);
 
   const loadUnread = async () => {
-    const count = await getUnreadCount();
-    setUnread(count);
+    try {
+      const count = await getUnreadCount();
+      setUnread(typeof count === "number" ? count : 0);
+    } catch (error) {
+      setUnread(0);
+    }
   };
 
   return (
@@ -121,11 +126,12 @@ function Navbar() {
 
           {user && (
             <Link
-              to="/login"
+              to="/"
               className="navbar-btn logout-btn"
               onClick={() => {
                 localStorage.removeItem("token");
-                window.location.href = "/login";
+                localStorage.removeItem("user");
+                window.location.href = "/";
               }}
             >
               Logout

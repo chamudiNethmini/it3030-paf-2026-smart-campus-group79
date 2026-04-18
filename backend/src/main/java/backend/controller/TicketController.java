@@ -1,8 +1,9 @@
 package backend.controller;
 
 import backend.entity.Ticket;
+import backend.entity.TicketComment;
 import backend.entity.Ticket.TicketStatus;
-import backend.entity.Ticket.TicketPriority;
+import backend.service.TicketCommentService;
 import backend.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,9 @@ public class TicketController {
 
     @Autowired
     private TicketService ticketService;
+
+    @Autowired
+    private TicketCommentService ticketCommentService;
 
     /**
      * Create a new ticket
@@ -76,6 +80,26 @@ public class TicketController {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
         return ResponseEntity.ok(ticket);
+    }
+
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<List<TicketComment>> getTicketComments(@PathVariable Long id) {
+        return ResponseEntity.ok(ticketCommentService.getCommentsByTicketId(id));
+    }
+
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<TicketComment> addTicketComment(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request,
+            Authentication auth
+    ) {
+        String message = request.get("message");
+        if (message == null || message.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        TicketComment comment = ticketCommentService.addComment(id, auth.getName(), message.trim());
+        return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
 
     /**
