@@ -2,17 +2,26 @@ import React, { useEffect, useState } from "react";
 import {
   getAllBookings,
   updateBookingStatus,
-  deleteBooking
+  deleteBooking,
 } from "../../services/bookingService";
 import "./ManageBookings.css";
 import Navbar from "../../Components/Navbar";
 
+const STATUS_VALUES = ["PENDING", "APPROVED", "REJECTED", "CANCELLED"];
+
+function normalizeStatus(status) {
+  if (status == null) return "PENDING";
+  const s = String(status);
+  return s.includes(".") ? s.split(".").pop().toUpperCase() : s.toUpperCase();
+}
 
 function ManageBookings() {
   const [bookings, setBookings] = useState([]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [emailFilterInput, setEmailFilterInput] = useState("");
+  const [emailFilterApplied, setEmailFilterApplied] = useState("");
   const [reasonInputs, setReasonInputs] = useState({});
 
   useEffect(() => {
@@ -25,12 +34,15 @@ function ManageBookings() {
       const payload = response?.data;
       if (Array.isArray(payload)) {
         setBookings(payload);
+        setReasonInputs({});
         setError("");
         return;
       }
 
       setBookings([]);
-      setError("Unexpected response while loading bookings. Please login again.");
+      setError(
+        "Unexpected response while loading bookings. Please login again."
+      );
     } catch (err) {
       console.error("Error fetching bookings:", err);
       setError("Failed to load bookings");
@@ -40,22 +52,41 @@ function ManageBookings() {
   const handleReasonChange = (id, value) => {
     setReasonInputs((prev) => ({
       ...prev,
-      [id]: value
+      [id]: value,
     }));
   };
 
-  const handleStatusUpdate = async (id, status) => {
+  const handleStatusChange = async (booking, nextStatus) => {
+    const normalized = normalizeStatus(nextStatus);
+    const current = normalizeStatus(booking.status);
+    if (normalized === current) return;
+
     setMessage("");
     setError("");
 
+    const mergedReason =
+      reasonInputs[booking.id] !== undefined
+        ? reasonInputs[booking.id]
+        : booking.adminReason || "";
+
+    if (normalized === "REJECTED") {
+      const reason = mergedReason.trim();
+      if (!reason) {
+        setError(
+          "Enter a rejection reason in the Reason field before selecting rejected."
+        );
+        return;
+      }
+    }
+
     try {
       const body = {
-        status,
-        adminReason: status === "REJECTED" ? reasonInputs[id] || "" : null
+        status: normalized,
+        adminReason: normalized === "REJECTED" ? mergedReason.trim() : null,
       };
 
-      await updateBookingStatus(id, body);
-      setMessage(`Booking ${id} updated to ${status}`);
+      await updateBookingStatus(booking.id, body);
+      setMessage(`Booking #${booking.id} updated to ${normalized.toLowerCase()}`);
       fetchBookings();
     } catch (err) {
       console.error("Error updating booking:", err);
@@ -77,108 +108,188 @@ function ManageBookings() {
     }
   };
 
+  const applyFilters = () => {
+    setEmailFilterApplied(emailFilterInput.trim().toLowerCase());
+  };
+
   const safeBookings = Array.isArray(bookings) ? bookings : [];
 
-  const filteredBookings =
-    statusFilter === "ALL"
-      ? safeBookings
-      : safeBookings.filter((booking) => booking.status === statusFilter);
+  const filteredBookings = safeBookings.filter((booking) => {
+    if (statusFilter !== "ALL" && normalizeStatus(booking.status) !== statusFilter) {
+      return false;
+    }
+    if (emailFilterApplied) {
+      const email = (booking.userEmail || "").toLowerCase();
+      if (!email.includes(emailFilterApplied)) return false;
+    }
+    return true;
+  });
 
   return (
     <>
-    <Navbar/>
-    <div className="manage-bookings-page">
-      <div className="manage-bookings-container">
-        <h2>Manage Bookings</h2>
+      <Navbar />
+      <div className="manage-bookings-page">
+        <div className="manage-bookings-container">
+          <header className="manage-bookings-header">
+            <div>
+              <span className="manage-bookings-badge">Admin booking control</span>
+              <h1 className="manage-bookings-title">Booking requests</h1>
+              <p className="manage-bookings-subtitle">
+                Approve or reject pending requests from here. Set status with the
+                dropdown in each row.
+              </p>
+              <ul className="status-legend">
+                <li>
+                  <span className="dot pending" /> pending
+                </li>
+                <li>
+                  <span className="dot approved" /> approved
+                </li>
+                <li>
+                  <span className="dot rejected" /> rejected
+                </li>
+                <li>
+                  <span className="dot cancelled" /> cancelled
+                </li>
+              </ul>
+            </div>
+            <div className="manage-bookings-stat-card">
+              <p className="stat-label">Total visible bookings</p>
+              <p className="stat-value">{filteredBookings.length}</p>
+            </div>
+          </header>
 
-        <div className="top-bar">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="ALL">All</option>
-            <option value="PENDING">Pending</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-
-          <button onClick={fetchBookings}>Refresh</button>
-        </div>
-
-        {message && <p className="success-message">{message}</p>}
-        {error && <p className="error-message">{error}</p>}
-
-        <div className="booking-grid">
-          {filteredBookings.length > 0 ? (
-            filteredBookings.map((booking) => (
-              <div className="booking-card" key={booking.id}>
-                <h3>Booking #{booking.id}</h3>
-                <p><strong>Resource ID:</strong> {booking.resourceId}</p>
-                <p><strong>User Email:</strong> {booking.userEmail}</p>
-                <p><strong>Date:</strong> {booking.bookingDate}</p>
-                <p><strong>Start Time:</strong> {booking.startTime}</p>
-                <p><strong>End Time:</strong> {booking.endTime}</p>
-                <p><strong>Purpose:</strong> {booking.purpose}</p>
-                <p><strong>Expected Attendees:</strong> {booking.expectedAttendees}</p>
-                <p>
-                  <strong>Status:</strong>
-                  <span className={`status ${booking.status?.toLowerCase()}`}>
-                    {booking.status}
-                  </span>
-                </p>
-                {booking.adminReason && (
-                  <p><strong>Admin Reason:</strong> {booking.adminReason}</p>
-                )}
-                <p><strong>Created At:</strong> {booking.createdAt}</p>
-
-                <div className="admin-actions">
-                  <textarea
-                    placeholder="Enter rejection reason"
-                    value={reasonInputs[booking.id] || ""}
-                    onChange={(e) =>
-                      handleReasonChange(booking.id, e.target.value)
-                    }
-                  />
-
-                  <div className="button-group">
-                    <button
-                      className="approve-btn"
-                      onClick={() => handleStatusUpdate(booking.id, "APPROVED")}
-                    >
-                      Approve
-                    </button>
-
-                    <button
-                      className="reject-btn"
-                      onClick={() => handleStatusUpdate(booking.id, "REJECTED")}
-                    >
-                      Reject
-                    </button>
-
-                    <button
-                      className="cancel-btn"
-                      onClick={() => handleStatusUpdate(booking.id, "CANCELLED")}
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDelete(booking.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
+          <section className="filters-card">
+            <div className="filters-card-header">
+              <div>
+                <h2>Filters</h2>
+                <p>Use filters to quickly find booking requests.</p>
               </div>
-            ))
-          ) : (
-            <p className="no-bookings">No bookings found</p>
-          )}
+            </div>
+            <div className="filters-row">
+              <label className="filter-field">
+                <span>Status</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="ALL">All</option>
+                  {STATUS_VALUES.map((s) => (
+                    <option key={s} value={s}>
+                      {s.toLowerCase()}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="filter-field filter-field-grow">
+                <span>User email</span>
+                <input
+                  type="text"
+                  placeholder="Search by user email"
+                  value={emailFilterInput}
+                  onChange={(e) => setEmailFilterInput(e.target.value)}
+                />
+              </label>
+            </div>
+            <div className="filters-actions">
+              <button type="button" className="btn-secondary" onClick={applyFilters}>
+                Apply filters
+              </button>
+              <button type="button" className="btn-primary" onClick={fetchBookings}>
+                Refresh
+              </button>
+            </div>
+          </section>
+
+          {message && <p className="success-message">{message}</p>}
+          {error && <p className="error-message">{error}</p>}
+
+          <section className="table-card">
+            <h2 className="table-card-title">Booking requests</h2>
+            <div className="table-wrap">
+              <table className="bookings-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Resource</th>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Reason</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBookings.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="no-bookings-cell">
+                        No bookings found
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredBookings.map((booking) => {
+                      const st = normalizeStatus(booking.status);
+                      return (
+                        <tr key={booking.id}>
+                          <td>{booking.id}</td>
+                          <td>
+                            <span className="cell-strong">#{booking.resourceId}</span>
+                          </td>
+                          <td>{booking.userEmail}</td>
+                          <td>{booking.bookingDate}</td>
+                          <td className="cell-nowrap">
+                            {booking.startTime} – {booking.endTime}
+                          </td>
+                          <td>
+                            <select
+                              className={`status-select status-select-${st.toLowerCase()}`}
+                              value={st}
+                              onChange={(e) =>
+                                handleStatusChange(booking, e.target.value)
+                              }
+                            >
+                              {STATUS_VALUES.map((s) => (
+                                <option key={s} value={s}>
+                                  {s.toLowerCase()}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              className="reason-input"
+                              placeholder="Required when setting rejected"
+                              value={
+                                reasonInputs[booking.id] !== undefined
+                                  ? reasonInputs[booking.id]
+                                  : booking.adminReason || ""
+                              }
+                              onChange={(e) =>
+                                handleReasonChange(booking.id, e.target.value)
+                              }
+                            />
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn-delete"
+                              onClick={() => handleDelete(booking.id)}
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
       </div>
-    </div>
     </>
   );
 }

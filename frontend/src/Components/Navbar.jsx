@@ -90,7 +90,10 @@ function Navbar() {
               <Link
                 to="/admin/bookings"
                 className={
-                  location.pathname === "/admin/bookings" ? "active-link" : ""
+                  location.pathname === "/admin/bookings" ||
+                  location.pathname === "/admin/manage-bookings"
+                    ? "active-link"
+                    : ""
                 }
               >
                 Manage Bookings
