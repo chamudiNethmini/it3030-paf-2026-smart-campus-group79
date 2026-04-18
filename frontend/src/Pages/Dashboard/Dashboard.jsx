@@ -1,19 +1,124 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import "./Dashboard.css";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { getAllBookings, getMyBookings } from "../../services/bookingService";
+import { getUnreadCount } from "../../services/notificationService";
 
 function Dashboard() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const role = user?.role || "USER";
   const roleClass = role.toLowerCase();
+  const [bookings, setBookings] = useState([]);
+  const [tickets, setTickets] = useState([]);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   const dashboardTitleByRole = {
     ADMIN: "Admin Dashboard",
     TECHNICIAN: "Technician Dashboard",
     USER: "User Dashboard",
   };
+
+  const normalizeStatus = (status) => {
+    const value = String(status || "").trim();
+    return value.includes(".") ? value.split(".").pop().toUpperCase() : value.toUpperCase();
+  };
+
+  const formatTicketTitle = (ticket) =>
+    ticket?.subject ||
+    ticket?.title ||
+    ticket?.description ||
+    ticket?.category ||
+    `Ticket #${ticket?.id ?? "-"}`;
+
+  const formatTicketMeta = (ticket) => {
+    const category = ticket?.category || ticket?.resourceLocation || "General";
+    const priority = ticket?.priority || "NORMAL";
+    return `${category} • ${priority}`;
+  };
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      if (!user?.email) {
+        return;
+      }
+
+      setLoading(true);
+      setLoadError("");
+      try {
+        const bookingsPromise =
+          role === "ADMIN" ? getAllBookings() : getMyBookings(user.email);
+
+        const ticketsPromise = fetch("http://localhost:8081/api/tickets", {
+          credentials: "include",
+        }).then((res) => {
+          if (!res.ok) {
+            throw new Error(`Failed to load tickets: ${res.status}`);
+          }
+          return res.json();
+        });
+
+        const [bookingsRes, ticketsData, unreadCount] = await Promise.all([
+          bookingsPromise,
+          ticketsPromise,
+          getUnreadCount(),
+        ]);
+
+        setBookings(Array.isArray(bookingsRes?.data) ? bookingsRes.data : []);
+        setTickets(Array.isArray(ticketsData) ? ticketsData : []);
+        setUnreadNotifications(
+          typeof unreadCount === "number" ? unreadCount : 0
+        );
+      } catch (err) {
+        console.error("Dashboard data load failed:", err);
+        setLoadError("Failed to load latest dashboard data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [role, user?.email]);
+
+  const bookingStats = useMemo(() => {
+    const total = bookings.length;
+    const active = bookings.filter((booking) => {
+      const st = normalizeStatus(booking.status);
+      return st === "APPROVED" || st === "PENDING";
+    }).length;
+    const pending = bookings.filter(
+      (booking) => normalizeStatus(booking.status) === "PENDING"
+    ).length;
+    return { total, active, pending };
+  }, [bookings]);
+
+  const ticketStats = useMemo(() => {
+    const total = tickets.length;
+    const open = tickets.filter((ticket) => {
+      const st = normalizeStatus(ticket.status);
+      return st === "OPEN" || st === "IN_PROGRESS";
+    }).length;
+    return { total, open };
+  }, [tickets]);
+
+  const recentBookings = useMemo(() => {
+    return [...bookings]
+      .sort((a, b) => {
+        const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      })
+      .slice(0, 3);
+  }, [bookings]);
+
+  const recentTickets = useMemo(() => {
+    return [...tickets]
+      .sort((a, b) => Number(b?.id || 0) - Number(a?.id || 0))
+      .slice(0, 3);
+  }, [tickets]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -107,85 +212,74 @@ function Dashboard() {
         <div className="cards">
           <div className="card">
             <div className="card-icon">📦</div>
-            <h3>24</h3>
+            <h3>{bookingStats.total}</h3>
             <p>Total Bookings</p>
           </div>
 
           <div className="card">
             <div className="card-icon">✅</div>
-            <h3>12</h3>
-            <p>Active Bookings</p>
+            <h3>{role === "ADMIN" ? bookingStats.pending : bookingStats.active}</h3>
+            <p>{role === "ADMIN" ? "Pending Bookings" : "Active Bookings"}</p>
           </div>
 
           <div className="card">
             <div className="card-icon">🎟️</div>
-            <h3>8</h3>
-            <p>Open Tickets</p>
+            <h3>{role === "USER" ? ticketStats.total : ticketStats.open}</h3>
+            <p>{role === "USER" ? "Tickets Raised" : "Open Tickets"}</p>
           </div>
 
           <div className="card">
             <div className="card-icon">🔔</div>
-            <h3>5</h3>
+            <h3>{unreadNotifications}</h3>
             <p>Notifications</p>
           </div>
         </div>
+
+        {loading && <p>Loading dashboard data...</p>}
+        {!loading && loadError && <p>{loadError}</p>}
 
         {/* Recent Sections */}
         <div className="recent-section">
           <div className="recent">
             <h3>📅 Recent Bookings</h3>
-
-            <div className="booking">
-              <p>
-                <strong>Lecture Hall A</strong>
-              </p>
-              <p className="booking-time">2025-01-20 • 10:00 - 11:00</p>
-              <span className="status approved">APPROVED</span>
-            </div>
-
-            <div className="booking">
-              <p>
-                <strong>Lab 3</strong>
-              </p>
-              <p className="booking-time">2025-01-20 • 13:00 - 15:00</p>
-              <span className="status pending">PENDING</span>
-            </div>
-
-            <div className="booking">
-              <p>
-                <strong>Meeting Room 2</strong>
-              </p>
-              <p className="booking-time">2025-01-21 • 09:00 - 10:00</p>
-              <span className="status rejected">REJECTED</span>
-            </div>
+            {!loading && recentBookings.length === 0 && (
+              <p className="booking-time">No recent bookings found.</p>
+            )}
+            {recentBookings.map((booking) => {
+              const status = normalizeStatus(booking.status);
+              return (
+                <div className="booking" key={booking.id}>
+                  <p>
+                    <strong>Booking #{booking.id}</strong>
+                  </p>
+                  <p className="booking-time">
+                    {booking.bookingDate} • {booking.startTime} - {booking.endTime}
+                  </p>
+                  <span className={`status ${status.toLowerCase()}`}>{status}</span>
+                </div>
+              );
+            })}
           </div>
 
           <div className="recent">
             <h3>🎟️ Recent Tickets</h3>
-
-            <div className="ticket">
-              <p>
-                <strong>Projector not working</strong>
-              </p>
-              <p className="ticket-time">Lab 1 • HIGH</p>
-              <span className="status open">OPEN</span>
-            </div>
-
-            <div className="ticket">
-              <p>
-                <strong>AC malfunction</strong>
-              </p>
-              <p className="ticket-time">Lab 2 • MEDIUM</p>
-              <span className="status in-progress">IN PROGRESS</span>
-            </div>
-
-            <div className="ticket">
-              <p>
-                <strong>Door lock broken</strong>
-              </p>
-              <p className="ticket-time">Room 204 • LOW</p>
-              <span className="status resolved">RESOLVED</span>
-            </div>
+            {!loading && recentTickets.length === 0 && (
+              <p className="ticket-time">No recent tickets found.</p>
+            )}
+            {recentTickets.map((ticket) => {
+              const status = normalizeStatus(ticket.status).replace("_", "-").toLowerCase();
+              return (
+                <div className="ticket" key={ticket.id}>
+                  <p>
+                    <strong>{formatTicketTitle(ticket)}</strong>
+                  </p>
+                  <p className="ticket-time">{formatTicketMeta(ticket)}</p>
+                  <span className={`status ${status}`}>
+                    {normalizeStatus(ticket.status).replace("_", " ")}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

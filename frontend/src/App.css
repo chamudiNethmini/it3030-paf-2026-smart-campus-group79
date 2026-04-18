@@ -36,3 +36,10 @@
     transform: rotate(360deg);
   }
 }
+
+/* Global themed dropdown fallback */
+select,
+option,
+optgroup {
+  color-scheme: dark;
+}

@@ -119,6 +119,10 @@ public class BookingService {
         String rejectionReason = request.getAdminReason() == null ? "" : request.getAdminReason().trim();
 
         switch (request.getStatus()) {
+            case PENDING:
+                notifMessage = "⏳ Your booking #" + id + " is now marked as PENDING by admin.";
+                notifType = "BOOKING_PENDING";
+                break;
             case APPROVED:
                 notifMessage = "✅ Your booking #" + id + " has been APPROVED!";
                 notifType = "BOOKING_APPROVED";
@@ -176,7 +180,7 @@ public class BookingService {
     }
 
     private void sendBookingNotificationToUser(String userEmail, Long bookingId, String message, String type) {
-        User user = userRepository.findByEmail(userEmail);
+        User user = userRepository.findByEmailIgnoreCase(userEmail);
         if (user == null) {
             return;
         }
