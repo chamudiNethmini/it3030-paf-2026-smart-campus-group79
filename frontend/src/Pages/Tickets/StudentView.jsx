@@ -43,6 +43,12 @@ export default function StudentView() {
   }, [loadTickets]);
 
   const submit = async () => {
+    // Validation for description length
+    if (form.description.length > 500) {
+      alert("Description cannot exceed 500 characters.");
+      return;
+    }
+
     const data = new FormData();
     Object.keys(form).forEach((key) => data.append(key, form[key]));
     Array.from(files)
@@ -107,6 +113,7 @@ export default function StudentView() {
                   <th>ID</th>
                   <th>Location</th>
                   <th>Category</th>
+                  <th>Description</th>
                   <th>Priority</th>
                   <th>Status</th>
                   {isAdmin && <th>Raised by</th>}
@@ -115,7 +122,7 @@ export default function StudentView() {
               <tbody>
                 {tickets.length === 0 && (
                   <tr>
-                    <td colSpan={isAdmin ? 6 : 5} className="tickets-empty">
+                    <td colSpan={isAdmin ? 7 : 6} className="tickets-empty">
                       No tickets yet.
                     </td>
                   </tr>
@@ -125,6 +132,7 @@ export default function StudentView() {
                     <td>#{t.id}</td>
                     <td>{t.resourceLocation}</td>
                     <td>{t.category}</td>
+                    <td>{t.description || "—"}</td>
                     <td>{t.priority}</td>
                     <td>{String(t.status || "").replace("_", " ")}</td>
                     {isAdmin && <td>{t.createdBy || "—"}</td>}
@@ -148,52 +156,53 @@ export default function StudentView() {
                 }
               />
 
-            <label>Category</label>
-            <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-            >
-              <option value="Hardware">Hardware</option>
-              <option value="Software">Software</option>
-              <option value="Infrastructure">Infrastructure</option>
-            </select>
+              <label>Category</label>
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+              >
+                <option value="Hardware">Hardware</option>
+                <option value="Software">Software</option>
+                <option value="Infrastructure">Infrastructure</option>
+              </select>
 
-            <label>Priority</label>
-            <select
-              value={form.priority}
-              onChange={(e) => setForm({ ...form, priority: e.target.value })}
-            >
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="URGENT">Urgent</option>
-            </select>
+              <label>Priority</label>
+              <select
+                value={form.priority}
+                onChange={(e) => setForm({ ...form, priority: e.target.value })}
+              >
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="URGENT">Urgent</option>
+              </select>
 
-            <label>Description</label>
-            <textarea
-              placeholder="What is the issue?"
-              value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-            />
+              <label>Description ({form.description.length}/500)</label>
+              <textarea
+                placeholder="What is the issue?"
+                value={form.description}
+                maxLength={500}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
+              />
 
-            <label>Contact details</label>
-            <input
-              placeholder="Phone or email"
-              value={form.contactDetails}
-              onChange={(e) =>
-                setForm({ ...form, contactDetails: e.target.value })
-              }
-            />
+              <label>Contact details</label>
+              <input
+                placeholder="Phone or email"
+                value={form.contactDetails}
+                onChange={(e) =>
+                  setForm({ ...form, contactDetails: e.target.value })
+                }
+              />
 
-            <label>Evidence (max 3 images)</label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => setFiles(e.target.files)}
-            />
+              <label>Evidence (max 3 images)</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => setFiles(e.target.files)}
+              />
 
               <button type="button" className="tickets-submit" onClick={submit}>
                 Submit ticket
@@ -212,13 +221,21 @@ export default function StudentView() {
               <div className="ticket-thread-head">
                 <strong>Ticket #{t.id}</strong> - {t.resourceLocation}
               </div>
+              <div className="ticket-thread-body">
+                <span className="ticket-reply-meta">
+                  {t.createdBy || "user"} - original message
+                </span>
+                <div>{t.description || "No description."}</div>
+              </div>
               <div className="ticket-thread-replies">
                 {Array.isArray(t.replies) && t.replies.length > 0 ? (
                   t.replies.map((r, idx) => (
                     <div className="ticket-reply" key={`${t.id}-r-${idx}`}>
                       <span className="ticket-reply-meta">
                         {r.authorEmail || "admin"}{" "}
-                        {r.createdAt ? `- ${new Date(r.createdAt).toLocaleString()}` : ""}
+                        {r.createdAt
+                          ? `- ${new Date(r.createdAt).toLocaleString()}`
+                          : ""}
                       </span>
                       <div>{r.message}</div>
                     </div>

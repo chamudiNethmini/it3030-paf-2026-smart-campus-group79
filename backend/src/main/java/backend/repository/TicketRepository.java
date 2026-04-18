@@ -10,4 +10,6 @@ import java.util.List;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     List<Ticket> findByCreatedByOrderByIdDesc(String createdBy);
+
+    List<Ticket> findByAssignedToOrderByIdDesc(String assignedTo);
 }

@@ -24,7 +24,7 @@ public class SecurityConfig {
     public SecurityConfig(
             ClientRegistrationRepository clientRegistrationRepository,
             CustomOAuth2UserService customOAuth2UserService,
-            @Value("${app.frontend-url:http://localhost:3001}") String frontendUrl
+            @Value("${app.frontend-url:http://localhost:3002}") String frontendUrl
     ) {
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.customOAuth2UserService = customOAuth2UserService;
@@ -61,7 +61,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/bookings/**").authenticated()
 
                         // Ticket Management
-                        .requestMatchers(HttpMethod.GET, "/api/tickets").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/tickets").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/tickets/*/assign").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/tickets/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/tickets/*/status").hasAnyRole("TECHNICIAN", "ADMIN")
@@ -80,6 +80,8 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                         )
                         .defaultSuccessUrl(frontendUrl + "/oauth-callback", true)
+                        .failureHandler((request, response, exception) ->
+                                response.sendRedirect(frontendUrl + "/login?error=oauth"))
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl(frontendUrl + "/login?logout")

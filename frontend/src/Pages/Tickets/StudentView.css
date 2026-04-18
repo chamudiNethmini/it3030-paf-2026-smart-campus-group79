@@ -133,6 +133,15 @@
     gap: 0.5rem;
 }
 
+.ticket-thread-body {
+    background: #fff7ed;
+    border: 1px solid #f4dbc3;
+    border-radius: 8px;
+    padding: 0.45rem 0.6rem;
+    margin-bottom: 0.55rem;
+    font-size: 0.9rem;
+}
+
 .ticket-reply {
     background: #f8fbff;
     border: 1px solid #e2edf9;

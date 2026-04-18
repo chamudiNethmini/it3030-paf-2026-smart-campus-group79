@@ -1,9 +1,8 @@
 package backend.service;
 
 import backend.entity.Notification;
-import backend.entity.Ticket;
-import backend.entity.Ticket.TicketStatus;
 import backend.entity.User;
+import backend.model.Ticket;
 import backend.repository.NotificationRepository;
 import backend.repository.TicketRepository;
 import backend.repository.UserRepository;
@@ -15,8 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * TicketService - Member 3
- * Handles ticket CRUD and notifies users of ticket status updates
+ * TicketService - handles assignment/status + notifications.
  */
 @Service
 public class TicketService {
@@ -33,36 +31,12 @@ public class TicketService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    /**
-     * Create a new ticket and notify the reporter
-     */
-    @Transactional
-    public Ticket createTicket(Ticket ticket) {
-        Ticket savedTicket = ticketRepository.save(ticket);
-
-        // 🔔 Send notification to reporter
-        Long userId = getUserIdByEmail(ticket.getReportedByEmail());
-        if (userId != null) {
-            Notification notif = new Notification(
-                    "✅ Your ticket \"" + ticket.getTitle() + "\" has been created with ID #" + savedTicket.getId(),
-                    "TICKET_CREATED",
-                    userId
-            );
-            notif.setTicketId(savedTicket.getId());
-            Notification savedNotif = notificationRepository.save(notif);
-            sendUserNotification(savedNotif);
-        }
-
-        System.out.println("✅ Ticket created: " + savedTicket.getId() + " - " + ticket.getTitle());
-        return savedTicket;
-    }
-
     public List<Ticket> getMyTickets(String technicianEmail) {
-        return ticketRepository.findByAssignedToEmail(technicianEmail);
+        return ticketRepository.findByAssignedToOrderByIdDesc(technicianEmail);
     }
 
     public List<Ticket> getReportedTickets(String userEmail) {
-        return ticketRepository.findByReportedByEmail(userEmail);
+        return ticketRepository.findByCreatedByOrderByIdDesc(userEmail);
     }
 
     public List<Ticket> getAllTickets() {
@@ -70,31 +44,18 @@ public class TicketService {
     }
 
     /**
-     * Assign ticket to technician and notify both parties
+     * Assign ticket to technician and notify reporter.
      */
     @Transactional
     public Ticket assignTicket(Long ticketId, String technicianEmail) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-        ticket.setAssignedToEmail(technicianEmail);
-        ticket.setStatus(TicketStatus.IN_PROGRESS);
+        ticket.setAssignedTo(technicianEmail);
+        ticket.setStatus(Ticket.Status.IN_PROGRESS);
         Ticket updated = ticketRepository.save(ticket);
 
-        // 🔔 Notify technician
-        Long techId = getUserIdByEmail(technicianEmail);
-        if (techId != null) {
-            Notification techNotif = new Notification(
-                    "🔧 You have been assigned ticket \"" + ticket.getTitle() + "\" (Priority: " + ticket.getPriority() + ")",
-                    "TICKET_ASSIGNED",
-                    techId
-            );
-            techNotif.setTicketId(ticketId);
-            sendUserNotification(notificationRepository.save(techNotif));
-        }
-
-        // 🔔 Notify reporter
-        Long reporterId = getUserIdByEmail(ticket.getReportedByEmail());
+        Long reporterId = getUserIdByEmail(ticket.getCreatedBy());
         if (reporterId != null) {
             Notification reporterNotif = new Notification(
                     "👨‍🔧 A technician has been assigned to your ticket #" + ticketId,
@@ -110,25 +71,25 @@ public class TicketService {
     }
 
     /**
-     * Update ticket status and notify reporter
+     * Update ticket status and notify reporter.
      */
     @Transactional
     public Ticket updateTicketStatus(Long ticketId, String statusStr, String resolution) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-        TicketStatus newStatus;
+        Ticket.Status newStatus;
         try {
-            newStatus = TicketStatus.valueOf(statusStr.toUpperCase());
+            newStatus = Ticket.Status.valueOf(statusStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid ticket status: " + statusStr);
         }
 
-        TicketStatus oldStatus = ticket.getStatus();
+        Ticket.Status oldStatus = ticket.getStatus();
         ticket.setStatus(newStatus);
 
         if (resolution != null && !resolution.isBlank()) {
-            ticket.setResolution(resolution);
+            ticket.setResolutionNotes(resolution);
         }
 
         Ticket updated = ticketRepository.save(ticket);
@@ -150,7 +111,7 @@ public class TicketService {
             default -> notifMessage = "📢 Your ticket #" + ticketId + " status changed to " + newStatus;
         }
 
-        Long reporterId = getUserIdByEmail(ticket.getReportedByEmail());
+        Long reporterId = getUserIdByEmail(ticket.getCreatedBy());
         if (reporterId != null) {
             Notification notif = new Notification(notifMessage, notifType, reporterId);
             notif.setTicketId(ticketId);

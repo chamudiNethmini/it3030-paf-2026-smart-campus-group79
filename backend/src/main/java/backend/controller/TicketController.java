@@ -1,9 +1,9 @@
 package backend.controller;
 
 import backend.entity.Role;
-import backend.entity.User;
-import backend.entity.Ticket;
 import backend.entity.TicketComment;
+import backend.entity.User;
+import backend.model.Ticket;
 import backend.repository.TicketRepository;
 import backend.repository.UserRepository;
 import backend.service.TicketCommentService;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +40,12 @@ public class TicketController {
     private TicketCommentService ticketCommentService;
 
     /**
-     * USER: own tickets. ADMIN / TECHNICIAN: all tickets.
+     * USER: own tickets. ADMIN: all tickets.
      */
     @GetMapping
     public List<Ticket> listTickets(Authentication authentication) {
         User actor = requireActor(authentication);
-        if (actor.getRole() == Role.ADMIN || actor.getRole() == Role.TECHNICIAN) {
+        if (actor.getRole() == Role.ADMIN) {
             return ticketRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         }
         return ticketRepository.findByCreatedByOrderByIdDesc(actor.getEmail());
@@ -125,7 +124,6 @@ public class TicketController {
             ticket.setDescription(description);
             ticket.setContactDetails(contactDetails);
             ticket.setCreatedBy(actor.getEmail());
-            ticket.setCreatedAt(LocalDateTime.now());
 
             // Enums handling (Assuming Ticket.Priority and Ticket.Status exist)
             ticket.setPriority(Ticket.Priority.valueOf(priority.toUpperCase()));
@@ -183,9 +181,9 @@ public class TicketController {
             @RequestBody Map<String, String> payload
     ) {
         User actor = requireActor(authentication);
-        if (actor.getRole() != Role.ADMIN && actor.getRole() != Role.TECHNICIAN) {
+            if (actor.getRole() != Role.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Only admin or technician can reply to tickets");
+                    .body("Only admin can reply to tickets");
         }
         String message = payload.get("message");
         if (message == null || message.isBlank()) {
@@ -194,11 +192,10 @@ public class TicketController {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
         
-        // Note: Ensure your Ticket entity has a TicketReply list/logic.
         ticket.getReplies().add(new Ticket.TicketReply(
                 actor.getEmail(),
                 message.trim(),
-                LocalDateTime.now()
+                java.time.LocalDateTime.now()
         ));
         return ResponseEntity.ok(ticketRepository.save(ticket));
     }
