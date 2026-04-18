@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   addResource,
   getAllResources,
@@ -140,12 +142,13 @@ const AddResource = () => {
   const validateForm = () => {
     const room = isRoomType(formData.type);
     const equip = isEquipmentType(formData.type);
+    const needsLocation = room || equip;
 
     const newErrors = {
       type: validateField("type", formData.type),
       name: equip ? validateField("name", formData.name) : "",
       capacity: validateField("capacity", formData.capacity),
-      location: room ? validateField("location", formData.location) : "",
+      location: needsLocation ? validateField("location", formData.location) : "",
       availabilityStart: validateField("availabilityStart", formData.availabilityStart),
       availabilityEnd: validateField("availabilityEnd", formData.availabilityEnd),
       status: validateField("status", formData.status),
@@ -161,12 +164,6 @@ const AddResource = () => {
     let updatedForm = { ...formData, [name]: value };
 
     if (name === "type") {
-      if (isEquipmentType(value)) {
-        updatedForm = {
-          ...updatedForm,
-          location: editingId ? updatedForm.location : "",
-        };
-      }
       if (isRoomType(value)) {
         updatedForm = { ...updatedForm, name: "" };
       }
@@ -179,7 +176,6 @@ const AddResource = () => {
       const next = { ...prev, [name]: fieldErr };
       if (name === "type") {
         if (isRoomType(value)) next.name = "";
-        if (isEquipmentType(value)) next.location = "";
       }
       return next;
     });
@@ -314,6 +310,71 @@ const AddResource = () => {
     loadResources();
   };
 
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF("p", "pt", "a4");
+    const generatedAt = new Date().toLocaleString();
+    const fileStamp = new Date().toISOString().slice(0, 10);
+
+    doc.setFontSize(16);
+    doc.text("Smart Campus - Resource Catalogue", 40, 42);
+    doc.setFontSize(10);
+    doc.text(`Generated: ${generatedAt}`, 40, 60);
+
+    const rows = resources.map((resource, index) => [
+      index + 1,
+      resource.name || "-",
+      resource.type || "-",
+      resource.capacity ?? "-",
+      resource.location || "-",
+      `${resource.availabilityStart || "-"} - ${resource.availabilityEnd || "-"}`,
+      resource.status || "-",
+      resource.description || "-",
+    ]);
+
+    autoTable(doc, {
+      startY: 76,
+      head: [[
+        "#",
+        "Name",
+        "Type",
+        "Capacity",
+        "Location",
+        "Availability",
+        "Status",
+        "Description",
+      ]],
+      body: rows,
+      styles: {
+        fontSize: 8,
+        cellPadding: 4,
+        valign: "middle",
+      },
+      headStyles: {
+        fillColor: [60, 123, 255],
+      },
+      columnStyles: {
+        0: { cellWidth: 22, halign: "center" },
+        1: { cellWidth: 72 },
+        2: { cellWidth: 66 },
+        3: { cellWidth: 48, halign: "center" },
+        4: { cellWidth: 70 },
+        5: { cellWidth: 88 },
+        6: { cellWidth: 52, halign: "center" },
+        7: { cellWidth: "auto" },
+      },
+      didDrawPage: (data) => {
+        doc.setFontSize(9);
+        doc.text(
+          `Page ${doc.getCurrentPageInfo().pageNumber}`,
+          data.settings.margin.left,
+          doc.internal.pageSize.height - 14
+        );
+      },
+    });
+
+    doc.save(`resources-report-${fileStamp}.pdf`);
+  };
+
   const room = isRoomType(formData.type);
   const equipment = isEquipmentType(formData.type);
 
@@ -383,14 +444,18 @@ const AddResource = () => {
               </div>
             )}
 
-            {room && (
+            {(room || equipment) && (
               <div className="form-group">
                 <label>Location</label>
                 <input
                   type="text"
                   name="location"
                   maxLength={LOCATION_MAX}
-                  placeholder="Building, floor, room (used as the catalogue name)"
+                  placeholder={
+                    room
+                      ? "Building, floor, room (used as the catalogue name)"
+                      : "Storage room, lab, or department location"
+                  }
                   value={formData.location}
                   onChange={handleChange}
                 />
@@ -477,6 +542,9 @@ const AddResource = () => {
         <div className="resource-list-card">
           <div className="resource-list-header">
             <h2>Added Resources</h2>
+            <button type="button" className="download-pdf-btn" onClick={handleDownloadPdf}>
+              Download PDF
+            </button>
           </div>
 
           <div className="search-bar-row">
