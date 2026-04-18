@@ -187,6 +187,23 @@
   box-shadow: 0 0 0 4px rgba(79, 124, 255, 0.12);
 }
 
+.booking-form-card input.readonly-input {
+  background: #f8fafc;
+  color: #475569;
+  cursor: not-allowed;
+}
+
+.booking-form-card input.readonly-input:focus {
+  border-color: #dbe4f0;
+  box-shadow: none;
+}
+
+.availability-hint {
+  margin: 2px 4px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
 .booking-submit-btn {
   margin-top: 8px;
   padding: 15px;
