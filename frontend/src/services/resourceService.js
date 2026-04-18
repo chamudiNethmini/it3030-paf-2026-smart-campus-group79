@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_ORIGIN } from "../config/apiConfig";
 
-const API_BASE_URL = "http://localhost:8081/api/resources";
+const API_BASE_URL = `${API_ORIGIN}/api/resources`;
 
 export const addResource = async (resourceData) => {
   return await axios.post(API_BASE_URL, resourceData);

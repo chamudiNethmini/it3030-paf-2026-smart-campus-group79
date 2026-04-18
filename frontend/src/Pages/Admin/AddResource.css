@@ -295,6 +295,12 @@
   margin-top: 4px;
 }
 
+.field-hint {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
 @media (max-width: 900px) {
   .admin-resource-nav {
     border-radius: 28px;
