@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { getMyBookings } from "../../services/bookingService";
+import { cancelMyBooking, getMyBookings } from "../../services/bookingService";
 import { getCurrentUser } from "../../services/authService";
+import { getAllResources } from "../../services/resourceService";
 import "./UserDashboard.css";
 import Navbar from "../../Components/Navbar";
 
@@ -10,6 +11,8 @@ function UserDashboard() {
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
   const [user, setUser] = useState(null);
+  const [resourceTypeById, setResourceTypeById] = useState({});
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     loadUser();
@@ -21,6 +24,15 @@ function UserDashboard() {
       setUser(currentUser);
       setUserEmail(currentUser.email);
 
+      const resourcesResponse = await getAllResources();
+      if (Array.isArray(resourcesResponse.data)) {
+        const map = resourcesResponse.data.reduce((acc, resource) => {
+          acc[Number(resource.id)] = resource.type || "Unknown";
+          return acc;
+        }, {});
+        setResourceTypeById(map);
+      }
+
       // auto load bookings
       const response = await getMyBookings(currentUser.email);
       setBookings(response.data);
@@ -31,6 +43,7 @@ function UserDashboard() {
   };
 
   const handleSearch = async () => {
+    setMessage("");
     setError("");
     setSearched(true);
 
@@ -41,6 +54,39 @@ function UserDashboard() {
       console.error("Error fetching bookings:", err);
       setError("Failed to load bookings");
       setBookings([]);
+    }
+  };
+
+  const normalizeStatus = (status) => {
+    const s = String(status || "PENDING");
+    return s.includes(".") ? s.split(".").pop().toUpperCase() : s.toUpperCase();
+  };
+
+  const formatResourceType = (resourceId) => {
+    const raw = resourceTypeById[Number(resourceId)];
+    if (!raw) return `#${resourceId}`;
+    return String(raw)
+      .toLowerCase()
+      .split("_")
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(" ");
+  };
+
+  const handleCancelBooking = async (bookingId) => {
+    try {
+      setError("");
+      setMessage("");
+      await cancelMyBooking(bookingId);
+      const response = await getMyBookings(userEmail);
+      setBookings(response.data);
+      setMessage(`Booking #${bookingId} cancelled successfully.`);
+    } catch (err) {
+      console.error("Cancel booking failed:", err);
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Failed to cancel booking"
+      );
     }
   };
 
@@ -68,6 +114,7 @@ function UserDashboard() {
             <button onClick={handleSearch}>View Bookings</button>
           </div>
 
+          {message && <p className="success-message">{message}</p>}
           {error && <p className="error-message">{error}</p>}
 
           {searched && bookings.length === 0 && !error && (
@@ -79,7 +126,7 @@ function UserDashboard() {
               <div className="booking-card" key={booking.id}>
                 <h3>Booking #{booking.id}</h3>
                 <p>
-                  <strong>Resource ID:</strong> {booking.resourceId}
+                  <strong>Type:</strong> {formatResourceType(booking.resourceId)}
                 </p>
                 <p>
                   <strong>Email:</strong> {booking.userEmail}
@@ -102,8 +149,10 @@ function UserDashboard() {
                 </p>
                 <p>
                   <strong>Status:</strong>
-                  <span className={`status ${booking.status?.toLowerCase()}`}>
-                    {booking.status}
+                  <span
+                    className={`status ${normalizeStatus(booking.status).toLowerCase()}`}
+                  >
+                    {normalizeStatus(booking.status)}
                   </span>
                 </p>
                 {booking.adminReason && (
@@ -114,6 +163,15 @@ function UserDashboard() {
                 <p>
                   <strong>Created At:</strong> {booking.createdAt}
                 </p>
+                {normalizeStatus(booking.status) !== "CANCELLED" && (
+                  <button
+                    type="button"
+                    className="cancel-booking-btn"
+                    onClick={() => handleCancelBooking(booking.id)}
+                  >
+                    Cancel Booking
+                  </button>
+                )}
               </div>
             ))}
           </div>

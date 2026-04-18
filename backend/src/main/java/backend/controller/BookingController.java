@@ -6,6 +6,7 @@ import backend.dto.BookingStatusUpdateRequest;
 import backend.enumtype.BookingStatus;
 import backend.service.BookingService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +62,16 @@ public class BookingController {
             @Valid @RequestBody BookingStatusUpdateRequest request
     ) {
         BookingResponse updatedBooking = bookingService.updateBookingStatus(id, request);
+        return ResponseEntity.ok(updatedBooking);
+    }
+
+    // 5b. Cancel booking by booking owner
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponse> cancelMyBooking(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        BookingResponse updatedBooking = bookingService.cancelMyBooking(id, authentication.getName());
         return ResponseEntity.ok(updatedBooking);
     }
 

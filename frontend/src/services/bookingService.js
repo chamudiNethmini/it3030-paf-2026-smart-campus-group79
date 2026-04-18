@@ -25,6 +25,10 @@ export const updateBookingStatus = (id, statusData) => {
   return axiosWithAuth.patch(`${API_URL}/${id}/status`, statusData);
 };
 
+export const cancelMyBooking = (id) => {
+  return axiosWithAuth.patch(`${API_URL}/${id}/cancel`);
+};
+
 export const deleteBooking = (id) => {
   return axiosWithAuth.delete(`${API_URL}/${id}`);
 };

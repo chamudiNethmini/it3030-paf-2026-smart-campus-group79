@@ -61,9 +61,9 @@ function Navbar() {
                 Book Resource
               </Link>
               <Link
-                to="/dashboard"
+                to="/my-bookings"
                 className={
-                  location.pathname === "/dashboard" ? "active-link" : ""
+                  location.pathname === "/my-bookings" ? "active-link" : ""
                 }
               >
                 My Bookings
