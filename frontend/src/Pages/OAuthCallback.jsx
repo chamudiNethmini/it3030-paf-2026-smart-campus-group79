@@ -6,6 +6,10 @@ function OAuthCallback() {
   const navigate = useNavigate();
   const { setUser, user } = useContext(AuthContext);
 
+  const getRedirectPathByRole = (role) => {
+    return "/dashboard";
+  };
+
   useEffect(() => {
     const handleCallback = async () => {
       try {
@@ -38,12 +42,12 @@ function OAuthCallback() {
 
             // Wait a moment for state to update then navigate
             await new Promise((resolve) => setTimeout(resolve, 300));
-            console.log("Navigating to dashboard...");
-            navigate("/dashboard", { replace: true });
+            const redirectPath = getRedirectPathByRole(userData.role);
+            console.log("Navigating to:", redirectPath);
+            navigate(redirectPath, { replace: true });
           } else {
             console.warn("❌ No email in response:", userData);
-            // Try again
-            setTimeout(() => (window.location.href = "/dashboard"), 500);
+            setTimeout(() => (window.location.href = "/login"), 500);
           }
         } else {
           const responseText = await response.text();
@@ -55,7 +59,7 @@ function OAuthCallback() {
             navigate("/login", { replace: true });
           } else {
             // Try navigation anyway
-            setTimeout(() => navigate("/dashboard", { replace: true }), 1000);
+            setTimeout(() => navigate("/login", { replace: true }), 1000);
           }
         }
       } catch (err) {

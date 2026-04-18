@@ -105,7 +105,6 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
 
-        BookingStatus oldStatus = booking.getStatus();
         booking.setStatus(request.getStatus());
 
         if (request.getStatus() == BookingStatus.REJECTED) {
@@ -145,8 +144,8 @@ public class BookingService {
             notif.setBookingId(id);
             Notification savedNotif = notificationRepository.save(notif);
 
-            // Send via WebSocket
-            messagingTemplate.convertAndSend("/topic/notifications", savedNotif);
+            // Send via user-scoped WebSocket topic
+            messagingTemplate.convertAndSend("/topic/notifications/" + user.getId(), savedNotif);
 
             System.out.println("🔔 Booking notification sent: " + notifMessage);
         }

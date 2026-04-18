@@ -1,8 +1,10 @@
 package backend.config;
 
 import backend.security.CustomOAuth2UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -17,9 +19,14 @@ import java.util.List;
 public class SecurityConfig {
 
     private final ClientRegistrationRepository clientRegistrationRepository;
+    private final String frontendUrl;
 
-    public SecurityConfig(ClientRegistrationRepository clientRegistrationRepository) {
+    public SecurityConfig(
+            ClientRegistrationRepository clientRegistrationRepository,
+            @Value("${app.frontend-url:http://localhost:3001}") String frontendUrl
+    ) {
         this.clientRegistrationRepository = clientRegistrationRepository;
+        this.frontendUrl = frontendUrl;
     }
 
     @Bean
@@ -32,11 +39,25 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/", "/login**", "/error", "/ws/**", "/oauth2/**", "/api/auth/**").permitAll()
                         .requestMatchers("/api/resources/**").permitAll()
-                        // User endpoints: allow login and get current user publicly
+                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .requestMatchers("/api/users/login").permitAll()
                         .requestMatchers("/api/users/me").permitAll()
-                        // All other /api/users/** endpoints require ADMIN role
+                        .requestMatchers(HttpMethod.GET, "/api/users/all").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*/role").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/status").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/bookings/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/bookings").hasAnyRole("ADMIN", "TECHNICIAN")
+                        .requestMatchers("/api/bookings/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/tickets").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/tickets/*/assign").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/tickets/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/tickets/*/status").hasAnyRole("TECHNICIAN", "ADMIN")
+                        .requestMatchers("/api/tickets/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/notifications").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/notifications/unread").hasRole("ADMIN")
+                        .requestMatchers("/api/notifications/**").authenticated()
                         // Any other request requires authentication
                         .anyRequest().authenticated()
                 )
@@ -70,7 +91,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .defaultSuccessUrl("http://localhost:3001/oauth-callback", true)
+                        .defaultSuccessUrl(frontendUrl + "/oauth-callback", true)
                 )
                 // ✅ LOGOUT
                 .logout(logout -> logout
@@ -86,13 +107,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ CORS config — frontend localhost:3000 සහ 3001 allow කරනවා
+    // ✅ CORS config for local frontend ports
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:3001"
+                "http://localhost:3001",
+                "http://localhost:5173",
+                "http://localhost:5174"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
