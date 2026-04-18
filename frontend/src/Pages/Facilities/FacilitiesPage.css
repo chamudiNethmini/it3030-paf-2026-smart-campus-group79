@@ -224,6 +224,35 @@
   color: #b33a3a;
 }
 
+.facility-card-footer {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e8eef7;
+}
+
+.facility-booking-btn {
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: 0.2s ease;
+  background: linear-gradient(135deg, #3c7bff, #6f7cff);
+  color: white;
+}
+
+.facility-booking-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.facility-booking-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .empty-text {
   color: #667991;
   font-weight: 600;

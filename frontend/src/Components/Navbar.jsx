@@ -1,10 +1,9 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "./Navbar.css";
-import { useEffect, useState } from "react";
 import { getUnreadCount } from "../services/notificationService";
-import { connectSocket } from "../services/socketService";
+import { connectSocket, disconnectSocket } from "../services/socketService";
 import { toast } from "react-toastify";
 
 function Navbar() {
@@ -13,123 +12,100 @@ function Navbar() {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
-    loadUnread();
+    if (user?.id) {
+      loadUnread();
 
-    const interval = setInterval(loadUnread, 5000);
+      // සෑම තත්පර 10 කට වරක් unread count එක check කිරීමට (Optional)
+      const interval = setInterval(loadUnread, 10000);
 
-    connectSocket((notification) => {
-      toast.info(notification.message);
-      setUnread((prev) => prev + 1);
-    });
+      // WebSocket හරහා Real-time notifications ලබා ගැනීම
+      connectSocket(user.id, (notification) => {
+        toast.info(notification.message);
+        setUnread((prev) => prev + 1);
+      });
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+      return () => {
+        clearInterval(interval);
+        disconnectSocket();
+      };
+    }
+  }, [user?.id]);
 
   const loadUnread = async () => {
-    const count = await getUnreadCount();
-    setUnread(count);
+    try {
+      const count = await getUnreadCount();
+      setUnread(typeof count === "number" ? count : 0);
+    } catch (error) {
+      setUnread(0);
+    }
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  };
+
+  // Active link එක බලාගැනීමට helper function එකක්
+  const isActive = (path) => (location.pathname === path ? "active-link" : "");
 
   return (
     <div className="navbar-wrapper">
       <nav className="navbar">
         <div className="navbar-left">
-          <div className="navbar-logo-circle">SC</div>
-          <div className="navbar-brand">
-            <h2>Smart Campus</h2>
-            <p>Operations Hub</p>
-          </div>
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+            <div className="navbar-logo-circle">SC</div>
+            <div className="navbar-brand">
+              <h2>Smart Campus</h2>
+              <p>Operations Hub</p>
+            </div>
+          </Link>
         </div>
 
         <div className="navbar-center">
-          {/* USER & ADMIN links */}
-          {(user?.role === "USER" || user?.role === "ADMIN") && (
+          {user && (
             <>
-              <Link
-                to="/bookings"
-                className={
-                  location.pathname === "/bookings" ? "active-link" : ""
-                }
-              >
-                Book Resource
+              {/* පොදු links (USER සහ ADMIN දෙන්නාටම) */}
+              <Link to="/facilities" className={isActive("/facilities")}>Facilities</Link>
+              <Link to="/bookings" className={isActive("/bookings")}>Book Resource</Link>
+              <Link to="/dashboard" className={isActive("/dashboard")}>My Bookings</Link>
+              
+              {/* Help Desk / Tickets Link */}
+              <Link to="/tickets" className={isActive("/tickets")}>Help Desk</Link>
+
+              {/* Notifications Link with Badge */}
+              <Link to="/notifications" className={isActive("/notifications")}>
+                Notifications
+                {unread > 0 && <span className="notif-badge">{unread}</span>}
               </Link>
-              <Link
-                to="/dashboard"
-                className={
-                  location.pathname === "/dashboard" ? "active-link" : ""
-                }
-              >
-                My Bookings
-              </Link>
-              {location.pathname !== "/bookings" && (
-                <Link
-                  to="/notifications"
-                  className={
-                    location.pathname === "/notifications" ? "active-link" : ""
-                  }
-                >
-                  Notifications{" "}
-                  {unread > 0 && (
-                    <span style={{ color: "red" }}>({unread})</span>
-                  )}
-                </Link>
-              )}
             </>
           )}
 
-          {/* ADMIN ONLY links - Hide from BookingPage */}
-          {user?.role === "ADMIN" && location.pathname !== "/bookings" && (
+          {/* ADMIN ONLY links */}
+          {user?.role === "ADMIN" && (
             <>
-              <Link
-                to="/admin/bookings"
-                className={
-                  location.pathname === "/admin/bookings" ? "active-link" : ""
-                }
-              >
-                Manage Bookings
-              </Link>
-              <Link
-                to="/admin/roles"
-                className={
-                  location.pathname === "/admin/roles" ? "active-link" : ""
-                }
-              >
-                Manage Roles
-              </Link>
+              <div className="admin-divider">|</div>
+              <Link to="/admin/manage-bookings" className={isActive("/admin/manage-bookings")}>Manage Bookings</Link>
+              <Link to="/admin/roles" className={isActive("/admin/roles")}>Manage Roles</Link>
             </>
           )}
         </div>
 
         <div className="navbar-right">
-          {!user && (
-            <Link to="/login" className="navbar-btn">
-              Login
-            </Link>
-          )}
-
-          {user?.role === "ADMIN" && (
-            <Link to="/admin/bookings" className="navbar-btn">
-              Admin
-            </Link>
-          )}
-
-          {user?.role === "ADMIN" && <Link to="/admin/roles">Admin Roles</Link>}
-
-          {user && <span className="user-email">{user.email}</span>}
-
-          {user && (
-            <Link
-              to="/login"
-              className="navbar-btn logout-btn"
-              onClick={() => {
-                localStorage.removeItem("token");
-                window.location.href = "/login";
-              }}
-            >
-              Logout
-            </Link>
+          {!user ? (
+            <Link to="/login" className="navbar-btn">Login</Link>
+          ) : (
+            <>
+              <div className="user-info">
+                <Link to="/profile" className="user-email-link">
+                  <span className="user-email">{user.email}</span>
+                </Link>
+                <span className="user-role-tag">{user.role}</span>
+              </div>
+              <button onClick={handleLogout} className="navbar-btn logout-btn">
+                Logout
+              </button>
+            </>
           )}
         </div>
       </nav>

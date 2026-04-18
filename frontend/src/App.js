@@ -5,9 +5,11 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// Pages
 import LoginPage from "./Pages/Login/LoginPage";
 import SignupPage from "./Pages/Login/SignupPage";
 import OAuthCallback from "./Pages/OAuthCallback";
+import LandingPage from "./Pages/Landing/LandingPage";
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import FacilitiesPage from "./Pages/Facilities/FacilitiesPage";
 import AddResource from "./Pages/Admin/AddResource";
@@ -19,22 +21,18 @@ import AdminRolesPage from "./Pages/Admin/AdminRolesPage";
 import AdminView from "./Pages/Tickets/AdminView";
 import StudentView from "./Pages/Tickets/StudentView";
 
-
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* PUBLIC ROUTES */}
-          <Route path="/" element={<LoginPage />} />
+          {/* --- PUBLIC ROUTES --- */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
 
-          <Route path="/admin" element={<AdminView />} />
-          <Route path="/student" element={<StudentView />} />
-
-          {/* PROTECTED USER ROUTES */}
+          {/* --- PROTECTED USER/STUDENT ROUTES --- */}
           <Route
             path="/dashboard"
             element={
@@ -43,7 +41,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/facilities"
             element={
@@ -52,7 +49,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/bookings"
             element={
@@ -61,7 +57,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/notifications"
             element={
@@ -70,8 +65,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-           <Route
+          <Route
             path="/tickets"
             element={
               <ProtectedRoute>
@@ -79,7 +73,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/profile"
             element={
@@ -89,7 +82,16 @@ function App() {
             }
           />
 
-          {/* ADMIN ROUTES */}
+          {/* --- ADMIN & TECHNICIAN ROUTES --- */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <AdminView />
+              </ProtectedRoute>
+            }
+          />
+          
           <Route
             path="/admin/add-resource"
             element={
@@ -99,8 +101,9 @@ function App() {
             }
           />
 
+          {/* Duplicate /admin/bookings එක ඉවත් කර manage-bookings පමණක් පවත්වා ගත්තා */}
           <Route
-            path="/admin/bookings"
+            path="/admin/manage-bookings"
             element={
               <ProtectedRoute role="ADMIN">
                 <ManageBookings />
@@ -113,6 +116,16 @@ function App() {
             element={
               <ProtectedRoute role="ADMIN">
                 <AdminRolesPage />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Student/User සඳහා වෙනම path එකක් අවශ්‍ය නම් පමණක් මෙය තබන්න */}
+          <Route
+            path="/student"
+            element={
+              <ProtectedRoute>
+                <StudentView />
               </ProtectedRoute>
             }
           />

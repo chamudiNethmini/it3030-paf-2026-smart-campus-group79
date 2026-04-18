@@ -6,29 +6,49 @@ import { useNavigate } from "react-router-dom";
 function Dashboard() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const role = user?.role || "USER";
+  const roleClass = role.toLowerCase();
+
+  const dashboardTitleByRole = {
+    ADMIN: "Admin Dashboard",
+    TECHNICIAN: "Technician Dashboard",
+    USER: "User Dashboard",
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/login";
+    localStorage.removeItem("user");
+    window.location.href = "/";
   };
 
   return (
-    <div className="dashboard">
+    <div className={`dashboard dashboard-${roleClass}`}>
       {/* Sidebar */}
       <div className="sidebar">
         <div className="sidebar-header">
           <h2>Smart Campus</h2>
+          <p className="sidebar-role">{role}</p>
         </div>
 
         <ul className="sidebar-menu">
           <li onClick={() => navigate("/dashboard")} className="menu-item">
             📊 Dashboard
           </li>
-          <li onClick={() => navigate("/facilities")} className="menu-item">
+          <li
+            onClick={() =>
+              navigate(user?.role === "ADMIN" ? "/admin/add-resource" : "/facilities")
+            }
+            className="menu-item"
+          >
             🏛️ Facilities
           </li>
-          <li onClick={() => navigate("/bookings")} className="menu-item">
-            📅 Bookings
+          <li
+            onClick={() =>
+              navigate(user?.role === "ADMIN" ? "/admin/bookings" : "/bookings")
+            }
+            className="menu-item"
+          >
+            📅 {user?.role === "ADMIN" ? "Manage Bookings" : "Bookings"}
           </li>
           <li onClick={() => navigate("/tickets")} className="menu-item">
             🎫 Tickets
@@ -64,7 +84,7 @@ function Dashboard() {
         {/* Top Header with User Profile */}
         <div className="top-header">
           <div className="header-title">
-            <h1>Dashboard</h1>
+            <h1>{dashboardTitleByRole[role] || "Dashboard"}</h1>
           </div>
           <div className="user-profile">
             <div className="user-info">

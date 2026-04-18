@@ -29,9 +29,15 @@ export const registerUser = async (data) => {
 
 // ✅ Current logged user (returns parsed JSON)
 export const getCurrentUser = async () => {
-  return fetch(`${BASE_URL}/me`, {
+  const response = await fetch(`${BASE_URL}/me`, {
     credentials: "include",
-  }).then((res) => res.json());
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return response.json();
 };
 
 // ✅ Get all users (ADMIN only) – returns parsed JSON

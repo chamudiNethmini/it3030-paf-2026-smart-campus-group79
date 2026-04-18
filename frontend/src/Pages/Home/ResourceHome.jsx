@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 import "./ResourceHome.css";
 
 const ResourceHome = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const isAdmin = user?.role === "ADMIN";
 
   return (
     <div className="resource-home-page">
@@ -24,9 +27,11 @@ const ResourceHome = () => {
             <button onClick={() => navigate("/facilities")} className="nav-btn">
               Browse Resources
             </button>
-            <button onClick={() => navigate("/admin/add-resource")} className="nav-btn">
-              Manage Resources
-            </button>
+            {isAdmin && (
+              <button onClick={() => navigate("/admin/add-resource")} className="nav-btn">
+                Manage Resources
+              </button>
+            )}
           </div>
         </div>
 
@@ -42,9 +47,11 @@ const ResourceHome = () => {
             <button className="hero-primary-btn" onClick={() => navigate("/facilities")}>
               Browse Resources
             </button>
-            <button className="hero-secondary-btn" onClick={() => navigate("/admin/add-resource")}>
-              Manage Resources
-            </button>
+            {isAdmin && (
+              <button className="hero-secondary-btn" onClick={() => navigate("/admin/add-resource")}>
+                Manage Resources
+              </button>
+            )}
           </div>
         </div>
       </div>

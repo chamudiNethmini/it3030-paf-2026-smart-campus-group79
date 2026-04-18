@@ -2,9 +2,12 @@ package backend.controller;
 
 import backend.entity.Role;
 import backend.entity.User;
-import backend.model.Ticket;
+import backend.entity.Ticket;
+import backend.entity.TicketComment;
 import backend.repository.TicketRepository;
 import backend.repository.UserRepository;
+import backend.service.TicketCommentService;
+import backend.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -31,16 +34,72 @@ public class TicketController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TicketService ticketService;
+
+    @Autowired
+    private TicketCommentService ticketCommentService;
+
     /**
      * USER: own tickets. ADMIN / TECHNICIAN: all tickets.
      */
     @GetMapping
     public List<Ticket> listTickets(Authentication authentication) {
         User actor = requireActor(authentication);
-        if (actor.getRole() == Role.ADMIN) {
+        if (actor.getRole() == Role.ADMIN || actor.getRole() == Role.TECHNICIAN) {
             return ticketRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         }
         return ticketRepository.findByCreatedByOrderByIdDesc(actor.getEmail());
+    }
+
+    /**
+     * Get tickets assigned to current technician
+     */
+    @GetMapping("/my")
+    public ResponseEntity<List<Ticket>> getMyTickets(Authentication auth) {
+        String email = auth.getName();
+        List<Ticket> tickets = ticketService.getMyTickets(email);
+        return ResponseEntity.ok(tickets);
+    }
+
+    /**
+     * Get tickets reported by current user
+     */
+    @GetMapping("/reported")
+    public ResponseEntity<List<Ticket>> getReportedTickets(Authentication auth) {
+        String email = auth.getName();
+        List<Ticket> tickets = ticketService.getReportedTickets(email);
+        return ResponseEntity.ok(tickets);
+    }
+
+    /**
+     * Get ticket by ID
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Ticket> getTicketById(@PathVariable Long id) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
+        return ResponseEntity.ok(ticket);
+    }
+
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<List<TicketComment>> getTicketComments(@PathVariable Long id) {
+        return ResponseEntity.ok(ticketCommentService.getCommentsByTicketId(id));
+    }
+
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<TicketComment> addTicketComment(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request,
+            Authentication auth
+    ) {
+        String message = request.get("message");
+        if (message == null || message.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        TicketComment comment = ticketCommentService.addComment(id, auth.getName(), message.trim());
+        return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
 
     @PostMapping("/submit")
@@ -66,7 +125,9 @@ public class TicketController {
             ticket.setDescription(description);
             ticket.setContactDetails(contactDetails);
             ticket.setCreatedBy(actor.getEmail());
+            ticket.setCreatedAt(LocalDateTime.now());
 
+            // Enums handling (Assuming Ticket.Priority and Ticket.Status exist)
             ticket.setPriority(Ticket.Priority.valueOf(priority.toUpperCase()));
             ticket.setStatus(Ticket.Status.OPEN);
 
@@ -90,6 +151,31 @@ public class TicketController {
         }
     }
 
+    /**
+     * Assign ticket to technician (admin only)
+     */
+    @PutMapping("/{id}/assign")
+    public ResponseEntity<Ticket> assignTicket(
+            @PathVariable Long id,
+            @RequestParam String technicianEmail
+    ) {
+        Ticket assigned = ticketService.assignTicket(id, technicianEmail);
+        return ResponseEntity.ok(assigned);
+    }
+
+    /**
+     * Update ticket status and add resolution notes
+     */
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Ticket> updateTicketStatus(
+            @PathVariable Long id,
+            @RequestParam String status,
+            @RequestParam(required = false) String resolution
+    ) {
+        Ticket updated = ticketService.updateTicketStatus(id, status, resolution);
+        return ResponseEntity.ok(updated);
+    }
+
     @PostMapping("/{id}/replies")
     public ResponseEntity<?> addReply(
             Authentication authentication,
@@ -97,9 +183,9 @@ public class TicketController {
             @RequestBody Map<String, String> payload
     ) {
         User actor = requireActor(authentication);
-        if (actor.getRole() != Role.ADMIN) {
+        if (actor.getRole() != Role.ADMIN && actor.getRole() != Role.TECHNICIAN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Only admin can reply to tickets");
+                    .body("Only admin or technician can reply to tickets");
         }
         String message = payload.get("message");
         if (message == null || message.isBlank()) {
@@ -107,6 +193,8 @@ public class TicketController {
         }
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
+        
+        // Note: Ensure your Ticket entity has a TicketReply list/logic.
         ticket.getReplies().add(new Ticket.TicketReply(
                 actor.getEmail(),
                 message.trim(),
