@@ -34,7 +34,12 @@ function Dashboard() {
           <li onClick={() => navigate("/dashboard")} className="menu-item">
             📊 Dashboard
           </li>
-          <li onClick={() => navigate("/facilities")} className="menu-item">
+          <li
+            onClick={() =>
+              navigate(user?.role === "ADMIN" ? "/admin/add-resource" : "/facilities")
+            }
+            className="menu-item"
+          >
             🏛️ Facilities
           </li>
           <li onClick={() => navigate("/bookings")} className="menu-item">
