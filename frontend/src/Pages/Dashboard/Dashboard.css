@@ -1,39 +1,43 @@
 .dashboard {
-  --accent: #273b6a;
-  --accent-soft: #d9e2f2;
-  --surface: #f4f6fa;
-  --card: #ffffff;
+  --accent: #2dd4bf;
+  --accent-soft: rgba(45, 212, 191, 0.16);
+  --surface: #0d1b2a;
+  --card: rgba(22, 35, 54, 0.78);
+  --text: #f5f0e8;
+  --muted: rgba(245, 240, 232, 0.62);
+  --border: rgba(255, 255, 255, 0.1);
   min-height: 100vh;
   display: flex;
-  background: var(--surface);
-  color: #162033;
+  background: radial-gradient(circle at top right, rgba(45, 212, 191, 0.08) 0%, transparent 40%), var(--surface);
+  color: var(--text);
 }
 
 .dashboard-admin {
-  --accent: #2b4f9a;
-  --accent-soft: #dbe7ff;
+  --accent: #60a5fa;
+  --accent-soft: rgba(96, 165, 250, 0.18);
 }
 
 .dashboard-user {
-  --accent: #1f3a66;
-  --accent-soft: #d9e3f3;
+  --accent: #2dd4bf;
+  --accent-soft: rgba(45, 212, 191, 0.16);
 }
 
 .dashboard-technician {
-  --accent: #256f5a;
-  --accent-soft: #d8efe8;
+  --accent: #34d399;
+  --accent-soft: rgba(52, 211, 153, 0.16);
 }
 
 .sidebar {
   width: 250px;
-  background: linear-gradient(180deg, #2d3f63 0%, #1f2c47 100%);
+  background: linear-gradient(180deg, #162336 0%, #0f1b2d 100%);
   color: #e9eef8;
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
   overflow-y: auto;
-  box-shadow: 8px 0 24px rgba(16, 27, 47, 0.18);
+  box-shadow: 10px 0 28px rgba(0, 0, 0, 0.35);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sidebar-header {
@@ -55,11 +59,11 @@
   font-weight: 700;
   letter-spacing: 0.4px;
   color: #0d1a30;
-  background: #d7e4fb;
+  background: #b7f5ec;
 }
 
 .dashboard-technician .sidebar-role {
-  background: #d2f0e7;
+  background: #b8f3dc;
 }
 
 .sidebar-menu {
@@ -77,7 +81,7 @@
 }
 
 .menu-item:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(45, 212, 191, 0.16);
 }
 
 .menu-divider {
@@ -107,8 +111,9 @@
 .card,
 .recent {
   background: var(--card);
-  border: 1px solid #dbe2ee;
+  border: 1px solid var(--border);
   border-radius: 16px;
+  backdrop-filter: blur(18px);
 }
 
 .top-header {
@@ -121,7 +126,7 @@
 
 .header-title h1 {
   margin: 0;
-  color: #111c32;
+  color: var(--text);
 }
 
 .user-profile {
@@ -130,8 +135,8 @@
   gap: 12px;
   padding: 10px 14px;
   border-radius: 12px;
-  background: #f7f9fd;
-  border: 1px solid #dde5f2;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
 }
 
 .user-info {
@@ -149,7 +154,7 @@
 
 .user-email {
   font-size: 13px;
-  color: #5a6986;
+  color: var(--muted);
 }
 
 .user-avatar {
@@ -161,27 +166,27 @@
   justify-content: center;
   color: white;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), #0d1930);
+  background: linear-gradient(135deg, var(--accent), #14b8a6);
 }
 
 .welcome {
   margin-bottom: 18px;
   padding: 18px;
-  background: linear-gradient(135deg, var(--accent-soft), #edf3ff);
+  background: linear-gradient(135deg, var(--accent-soft), rgba(255, 255, 255, 0.03));
 }
 
 .dashboard-technician .welcome {
-  background: linear-gradient(135deg, #d7efe8, #edf8f4);
+  background: linear-gradient(135deg, var(--accent-soft), rgba(255, 255, 255, 0.03));
 }
 
 .welcome h2 {
   margin: 0 0 6px;
-  color: #10213f;
+  color: var(--text);
 }
 
 .welcome p {
   margin: 0;
-  color: #45597d;
+  color: var(--muted);
 }
 
 .cards {
@@ -198,7 +203,7 @@
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 24px rgba(18, 35, 62, 0.09);
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.28);
 }
 
 .card-icon {
@@ -213,7 +218,7 @@
 
 .card p {
   margin: 0;
-  color: #5f6f8f;
+  color: var(--muted);
 }
 
 .recent-section {
@@ -229,23 +234,23 @@
 .recent h3 {
   margin: 0 0 14px;
   padding-bottom: 10px;
-  border-bottom: 2px solid var(--accent-soft);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .booking,
 .ticket {
-  border: 1px solid #dbe3ef;
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 12px;
   margin-bottom: 10px;
-  background: #fcfdff;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .booking-time,
 .ticket-time {
   margin-top: 4px;
   font-size: 12px;
-  color: #6c7b98;
+  color: var(--muted);
 }
 
 .status {

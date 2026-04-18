@@ -3,7 +3,7 @@
 /* ===== SIGNUP PAGE ===== */
 .signup-page {
   min-height: 100vh;
-  background: #060e1f;
+  background: radial-gradient(circle at top right, rgba(45, 212, 191, 0.14) 0%, transparent 42%), #060e1f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,7 +24,7 @@
 .blob-1 {
   width: 500px;
   height: 500px;
-  background: #3b82f6;
+  background: #2dd4bf;
   top: -100px;
   left: -150px;
   animation-delay: 0s;
@@ -32,7 +32,7 @@
 .blob-2 {
   width: 400px;
   height: 400px;
-  background: #1d4ed8;
+  background: #14b8a6;
   bottom: -80px;
   right: -100px;
   animation-delay: 3s;
@@ -40,7 +40,7 @@
 .blob-3 {
   width: 300px;
   height: 300px;
-  background: #60a5fa;
+  background: #34d399;
   top: 50%;
   left: 50%;
   animation: floatBlob3 8s ease-in-out infinite;
@@ -104,14 +104,14 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #2dd4bf, #14b8a6);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 900;
   font-size: 15px;
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.35);
 }
 .signup-logo-text h1 {
   margin: 0;
@@ -169,16 +169,16 @@
   color: rgba(255, 255, 255, 0.35);
 }
 .signup-input:focus {
-  border-color: rgba(59, 130, 246, 0.6);
-  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(45, 212, 191, 0.7);
+  background: rgba(45, 212, 191, 0.08);
 }
 
 /* ===== SIGNUP BUTTON ===== */
 .signup-btn {
   width: 100%;
   padding: 13px;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
+  background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+  color: #0d1b2a;
   border: none;
   border-radius: 10px;
   font-size: 15px;
@@ -186,11 +186,11 @@
   cursor: pointer;
   margin-bottom: 16px;
   transition: all 0.25s ease;
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+  box-shadow: 0 4px 16px rgba(45, 212, 191, 0.3);
 }
 .signup-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.45);
+  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.4);
 }
 .signup-btn:disabled {
   opacity: 0.6;
@@ -245,8 +245,8 @@
 }
 .signup-google-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-  background: #f0f6ff;
+  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.3);
+  background: #ecfffb;
 }
 .google-icon {
   width: 20px;
@@ -272,12 +272,12 @@
   margin: 0;
 }
 .login-link span {
-  color: #60a5fa;
+  color: #5eead4;
   font-weight: 600;
   text-decoration: underline;
 }
 .login-link:hover span {
-  color: #93c5fd;
+  color: #99f6e4;
 }
 
 /* ===== RESPONSIVE ===== */
