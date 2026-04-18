@@ -95,6 +95,15 @@ function App() {
           />
 
           <Route
+            path="/admin/manage-bookings"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <ManageBookings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/admin/roles"
             element={
               <ProtectedRoute role="ADMIN">
