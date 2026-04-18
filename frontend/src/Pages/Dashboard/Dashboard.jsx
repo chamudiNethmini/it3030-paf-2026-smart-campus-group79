@@ -44,7 +44,7 @@ function Dashboard() {
           </li>
           <li
             onClick={() =>
-              navigate(user?.role === "ADMIN" ? "/admin/bookings" : "/bookings")
+              navigate(user?.role === "ADMIN" ? "/admin/manage-bookings" : "/bookings")
             }
             className="menu-item"
           >
