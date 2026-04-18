@@ -85,6 +85,7 @@ function UserDashboard() {
       setError(
         err.response?.data?.message ||
           err.response?.data?.error ||
+          (typeof err.response?.data === "string" ? err.response.data : null) ||
           "Failed to cancel booking"
       );
     }

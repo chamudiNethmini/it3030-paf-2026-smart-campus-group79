@@ -147,7 +147,11 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
 
-        if (requestUserEmail == null || !booking.getUserEmail().equalsIgnoreCase(requestUserEmail)) {
+        if (
+                requestUserEmail == null
+                        || requestUserEmail.isBlank()
+                        || !booking.getUserEmail().equalsIgnoreCase(requestUserEmail)
+        ) {
             throw new RuntimeException("You can only cancel your own booking");
         }
 
