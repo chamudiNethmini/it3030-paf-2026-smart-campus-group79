@@ -7,6 +7,7 @@ import backend.enumtype.BookingStatus;
 import backend.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -71,7 +72,14 @@ public class BookingController {
             @PathVariable Long id,
             Authentication authentication
     ) {
-        BookingResponse updatedBooking = bookingService.cancelMyBooking(id, authentication.getName());
+        String requestEmail = authentication.getName();
+        if (authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
+            String oauthEmail = oAuth2User.getAttribute("email");
+            if (oauthEmail != null && !oauthEmail.isBlank()) {
+                requestEmail = oauthEmail;
+            }
+        }
+        BookingResponse updatedBooking = bookingService.cancelMyBooking(id, requestEmail);
         return ResponseEntity.ok(updatedBooking);
     }
 
