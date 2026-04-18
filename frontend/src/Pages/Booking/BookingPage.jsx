@@ -1,15 +1,35 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { createBooking } from "../../services/bookingService";
+import { getResourceById } from "../../services/resourceService";
+import { AuthContext } from "../../context/AuthContext";
 import Navbar from "../../Components/Navbar";
 import "./BookingPage.css";
+
+const formatTimeForInput = (value) => {
+  if (!value) return "";
+  const str = String(value);
+  return str.length >= 5 ? str.slice(0, 5) : str;
+};
+
+const timeToMinutes = (value) => {
+  if (!value) return null;
+  const parts = String(value).split(":");
+  if (parts.length < 2) return null;
+  const hours = Number(parts[0]);
+  const mins = Number(parts[1]);
+  if (Number.isNaN(hours) || Number.isNaN(mins)) return null;
+  return hours * 60 + mins;
+};
 
 function BookingPage() {
   const bookingFormRef = useRef(null);
   const [searchParams] = useSearchParams();
+  const { user } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({
     resourceId: "",
+    resourceType: "",
     userEmail: "",
     bookingDate: "",
     startTime: "",
@@ -20,6 +40,11 @@ function BookingPage() {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [resourceAvailability, setResourceAvailability] = useState({
+    start: "",
+    end: "",
+  });
+  const [resourceCapacity, setResourceCapacity] = useState(null);
 
   const scrollToForm = () => {
     bookingFormRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -29,11 +54,62 @@ function BookingPage() {
     const rid = searchParams.get("resourceId");
     if (rid != null && String(rid).trim() !== "") {
       const id = String(rid).trim();
-      setFormData((prev) => ({ ...prev, resourceId: id }));
+      setFormData((prev) => ({ ...prev, resourceId: id, resourceType: "" }));
       const t = window.setTimeout(() => scrollToForm(), 250);
       return () => window.clearTimeout(t);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      userEmail: user?.email || "",
+    }));
+  }, [user?.email]);
+
+  useEffect(() => {
+    const id = Number(formData.resourceId);
+    if (!id) {
+      setResourceAvailability({ start: "", end: "" });
+      setResourceCapacity(null);
+      setFormData((prev) => ({ ...prev, resourceType: "" }));
+      return;
+    }
+
+    let isMounted = true;
+    const loadResource = async () => {
+      try {
+        const response = await getResourceById(id);
+        const resource = response?.data;
+        if (!isMounted || !resource) return;
+
+        setFormData((prev) => ({
+          ...prev,
+          resourceType: resource.type || "",
+        }));
+        setResourceAvailability({
+          start: formatTimeForInput(resource.availabilityStart),
+          end: formatTimeForInput(resource.availabilityEnd),
+        });
+        setResourceCapacity(
+          Number.isFinite(Number(resource.capacity))
+            ? Number(resource.capacity)
+            : null
+        );
+      } catch (err) {
+        if (!isMounted) return;
+        setResourceAvailability({ start: "", end: "" });
+        setResourceCapacity(null);
+        setFormData((prev) => ({ ...prev, resourceType: "" }));
+        setError("Failed to load selected resource details.");
+      }
+    };
+
+    loadResource();
+    return () => {
+      isMounted = false;
+    };
+  }, [formData.resourceId]);
 
   const handleChange = (e) => {
     setFormData({
@@ -47,12 +123,57 @@ function BookingPage() {
     setMessage("");
     setError("");
 
+    if (!formData.resourceId) {
+      setError("Please select a resource from Facilities before booking.");
+      return;
+    }
+
+    const startMinutes = timeToMinutes(formData.startTime);
+    const endMinutes = timeToMinutes(formData.endTime);
+    const availableStart = timeToMinutes(resourceAvailability.start);
+    const availableEnd = timeToMinutes(resourceAvailability.end);
+
+    if (startMinutes == null || endMinutes == null) {
+      setError("Please enter valid start and end times.");
+      return;
+    }
+
+    if (endMinutes <= startMinutes) {
+      setError("End time must be later than start time.");
+      return;
+    }
+
+    if (
+      availableStart != null &&
+      availableEnd != null &&
+      (startMinutes < availableStart || endMinutes > availableEnd)
+    ) {
+      setError(
+        `Booking time must be within resource availability (${resourceAvailability.start} - ${resourceAvailability.end}).`
+      );
+      return;
+    }
+
+    const attendees = Number(formData.expectedAttendees);
+    if (!Number.isFinite(attendees) || attendees <= 0) {
+      setError("Expected attendees must be greater than zero.");
+      return;
+    }
+
+    if (resourceCapacity != null && attendees > resourceCapacity) {
+      setError(
+        `Expected attendees must be less than or equal to resource capacity (${resourceCapacity}).`
+      );
+      return;
+    }
+
     try {
       const bookingData = {
-        ...formData,
         resourceId: Number(formData.resourceId),
-        expectedAttendees: Number(formData.expectedAttendees),
+        userEmail: formData.userEmail,
+        expectedAttendees: attendees,
         bookingDate: formData.bookingDate,
+        purpose: formData.purpose,
         startTime:
           formData.startTime.length === 5
             ? `${formData.startTime}:00`
@@ -70,8 +191,9 @@ function BookingPage() {
       setError("");
 
       setFormData({
-        resourceId: "",
-        userEmail: "",
+        resourceId: formData.resourceId,
+        resourceType: formData.resourceType,
+        userEmail: user?.email || "",
         bookingDate: "",
         startTime: "",
         endTime: "",
@@ -109,7 +231,7 @@ function BookingPage() {
 
             <div className="booking-hero-buttons">
               <button onClick={scrollToForm}>Create Booking</button>
-              <a href="/dashboard">My Bookings</a>
+              <a href="/my-bookings">My Bookings</a>
             </div>
           </div>
         </div>
@@ -129,12 +251,12 @@ function BookingPage() {
             <form onSubmit={handleSubmit}>
               <div className="booking-grid">
                 <input
-                  type="number"
-                  name="resourceId"
-                  placeholder="Resource ID"
-                  value={formData.resourceId}
-                  onChange={handleChange}
-                  required
+                  type="text"
+                  name="resourceType"
+                  placeholder="Resource Type"
+                  value={formData.resourceType}
+                  readOnly
+                  className="readonly-input"
                 />
 
                 <input
@@ -142,7 +264,8 @@ function BookingPage() {
                   name="userEmail"
                   placeholder="User Email"
                   value={formData.userEmail}
-                  onChange={handleChange}
+                  readOnly
+                  className="readonly-input"
                   required
                 />
               </div>
@@ -162,6 +285,8 @@ function BookingPage() {
                   placeholder="Expected Attendees"
                   value={formData.expectedAttendees}
                   onChange={handleChange}
+                  min="1"
+                  max={resourceCapacity ?? undefined}
                   required
                 />
               </div>
@@ -172,6 +297,8 @@ function BookingPage() {
                   name="startTime"
                   value={formData.startTime}
                   onChange={handleChange}
+                  min={resourceAvailability.start || undefined}
+                  max={resourceAvailability.end || undefined}
                   required
                 />
 
@@ -180,9 +307,24 @@ function BookingPage() {
                   name="endTime"
                   value={formData.endTime}
                   onChange={handleChange}
+                  min={resourceAvailability.start || undefined}
+                  max={resourceAvailability.end || undefined}
                   required
                 />
               </div>
+
+              <p className="availability-hint">
+                Availability:{" "}
+                {resourceAvailability.start && resourceAvailability.end
+                  ? `${resourceAvailability.start} - ${resourceAvailability.end}`
+                  : "Select a resource from Facilities to load availability"}
+              </p>
+              <p className="availability-hint">
+                Capacity:{" "}
+                {resourceCapacity != null
+                  ? `Up to ${resourceCapacity} attendees`
+                  : "Select a resource from Facilities to load capacity"}
+              </p>
 
               <input
                 type="text"
