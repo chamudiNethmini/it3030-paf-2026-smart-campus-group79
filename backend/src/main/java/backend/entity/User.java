@@ -5,6 +5,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
 @Entity
+@Table(name = "user")
 public class User {
 
     @Id

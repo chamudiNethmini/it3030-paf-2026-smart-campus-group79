@@ -12,29 +12,20 @@ public class Notification {
 
     private String message;
 
-    private boolean isRead = false;
+    private String type;
 
-    @Column(nullable = true)
     private Long userId;
 
-    @Column(nullable = true)
     private Long bookingId;
 
-    @Column(nullable = true)
     private Long ticketId;
 
-    @Column(nullable = false)
-    private String type;
+    private boolean isRead = false;
+
 
     private LocalDateTime createdAt;
 
     public Notification() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public Notification(String message, String type) {
-        this.message = message;
-        this.type = type;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -59,16 +50,12 @@ public class Notification {
         this.message = message;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public String getType() {
+        return type;
     }
 
-    public boolean isRead() {
-        return isRead;
-    }
-
-    public void setRead(boolean read) {
-        isRead = read;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Long getUserId() {
@@ -95,11 +82,15 @@ public class Notification {
         this.ticketId = ticketId;
     }
 
-    public String getType() {
-        return type;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
     }
 }

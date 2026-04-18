@@ -49,66 +49,84 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    // ✅ Get all users for admin
+    // ✅ Get all users for admin (same as GET /)
     @GetMapping("/all")
     public List<User> getAllUsersAdmin() {
         return userService.getAllUsers();
     }
 
-    // ✅ Current logged user with email, name, role and id
+    // ✅ Current logged user with email, name and role
     @GetMapping("/me")
     public Map<String, Object> getCurrentUser(Authentication authentication) {
 
         Map<String, Object> userData = new HashMap<>();
 
-        if (authentication == null) {
+        System.out.println("🔍 /api/users/me called");
+        System.out.println("Auth object: " + authentication);
+        
+        if (authentication != null) {
+            System.out.println("Auth is NOT null");
+            System.out.println("Principal: " + authentication.getPrincipal());
+            System.out.println("Principal class: " + authentication.getPrincipal().getClass().getName());
+        } else {
             System.out.println("❌ Auth is NULL - User not authenticated");
-            return userData;
+            return userData; // Return empty map if not authenticated
         }
 
-        Object principal = authentication.getPrincipal();
+        if (authentication != null && authentication.getPrincipal() != null) {
 
-        if (principal instanceof OAuth2User oAuth2User) {
-            // ✅ Google OAuth2 Login
-            System.out.println("✅ OAuth2User detected");
+            Object principal = authentication.getPrincipal();
 
-            String email = oAuth2User.getAttribute("email");
-            String name = oAuth2User.getAttribute("name");
+            if (principal instanceof OAuth2User oAuth2User) {
+                // OAuth2 User (Google login)
+                System.out.println("✅ OAuth2User detected");
+                String email = oAuth2User.getAttribute("email");
+                String name = oAuth2User.getAttribute("name");
+                
+                System.out.println("Email from OAuth: " + email);
+                System.out.println("Name from OAuth: " + name);
 
-            // 🔥 AUTO-CREATE USER IF NOT EXISTS
-            User foundUser = userRepository.findByEmail(email);
-            if (foundUser == null) {
-                System.out.println("🔥 New Google user - saving to DB: " + email);
-                User newUser = new User();
-                newUser.setEmail(email);
-                newUser.setName(name);
-                newUser.setRole(Role.USER);
-                foundUser = userRepository.save(newUser);
-            }
+                // 🔥 AUTO-CREATE USER IF NOT EXISTS
+                User foundUser = userRepository.findByEmail(email);
+                if (foundUser == null) {
+                    System.out.println("User not found, creating new user...");
+                    User newUser = new User();
+                    newUser.setEmail(email);
+                    newUser.setName(name);
+                    newUser.setRole(Role.USER); // default role
+                    foundUser = userRepository.save(newUser);
+                    System.out.println("✅ User created with ID: " + foundUser.getId());
+                }
 
-            userData.put("id", foundUser.getId());
-            userData.put("email", foundUser.getEmail());
-            userData.put("name", foundUser.getName());
-            userData.put("role", foundUser.getRole().name());
+                String role = foundUser.getRole().name();
+                System.out.println("User found in DB with role: " + role);
 
-        } else {
-            // ✅ Form-based Login (email/password)
-            System.out.println("✅ Form-based login detected");
-
-            String email = authentication.getName();
-            User foundUser = userRepository.findByEmail(email);
-
-            if (foundUser != null) {
-                userData.put("id", foundUser.getId());
                 userData.put("email", foundUser.getEmail());
                 userData.put("name", foundUser.getName());
-                userData.put("role", foundUser.getRole().name());
-            } else {
-                System.out.println("❌ No user found for email: " + email);
+                userData.put("role", role);
+                userData.put("id", foundUser.getId());
+
+            } else if (authentication.getName() != null) {
+                // Form-based login (email/password)
+                System.out.println("✅ Form-based login detected");
+                String email = authentication.getName();
+                System.out.println("Email from form: " + email);
+                
+                User foundUser = userRepository.findByEmail(email);
+
+                if (foundUser != null) {
+                    userData.put("email", foundUser.getEmail());
+                    userData.put("name", foundUser.getName());
+                    userData.put("role", foundUser.getRole().name());
+                    userData.put("id", foundUser.getId());
+                    System.out.println("User found in DB: " + foundUser.getEmail());
+                } else {
+                    System.out.println("❌ No user found for email: " + email);
+                }
             }
         }
 
-        System.out.println("✅ Returning userData: " + userData);
+        System.out.println("Returning userData: " + userData);
         return userData;
     }
 
@@ -132,9 +150,10 @@ public class UserController {
         return "User not found!";
     }
 
-    // ✅ Login endpoint (Form-based)
+    // ✅ Login endpoint - merged into class
     @PostMapping("/login")
     public User login(@RequestBody User user) {
+
         User existingUser = userRepository.findByEmail(user.getEmail());
 
         if (existingUser != null && existingUser.getPassword().equals(user.getPassword())) {
@@ -147,8 +166,11 @@ public class UserController {
     // ✅ Update user role (ADMIN only)
     @PutMapping("/{id}/role")
     public User updateUserRole(@PathVariable Long id, @RequestParam String role) {
+
         User user = userRepository.findById(id).orElseThrow();
-        user.setRole(Role.valueOf(role));
+
+        user.setRole(Role.valueOf(role)); // ADMIN / USER
+
         return userRepository.save(user);
     }
 

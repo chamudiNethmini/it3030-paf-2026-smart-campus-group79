@@ -31,39 +31,24 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             User newUser = new User();
             newUser.setName(name);
             newUser.setEmail(email);
-
-            // ✅ Auto-assign roles based on email patterns (customizable)
-            Role assignedRole = Role.USER;  // Default role
-
-            // Admin list
-            if (email.equals("gayanthawannisekara@gmail.com")) {
-                assignedRole = Role.ADMIN;
-            }
-            // Technician list (can expand)
-            else if (email.endsWith("@technicians.com") || email.equals("tech@campus.edu")) {
-                assignedRole = Role.TECHNICIAN;
-            }
-
-            newUser.setRole(assignedRole);
+            newUser.setRole(Role.USER);
             existingUser = userRepository.save(newUser);
-            System.out.println("✅ New OAuth user created: " + email + " with role: " + assignedRole);
+            System.out.println("✅ New OAuth user created: " + email + " with role: USER");
         } else {
-            // Update role if admin email
-            if (email.equals("gayanthawannisekara@gmail.com") && existingUser.getRole() != Role.ADMIN) {
-                existingUser.setRole(Role.ADMIN);
-                userRepository.save(existingUser);
-                System.out.println("✅ Updated OAuth user role to ADMIN: " + email);
-            }
-            System.out.println("✅ OAuth user already exists: " + email + " with role: " + existingUser.getRole());
+            // Role always comes from the database (set by admin / seed data)
+            System.out.println("✅ OAuth user found in DB: " + email + " with role: " + existingUser.getRole());
         }
 
-        // 🔥 SET PROPER AUTHORITIES BASED ON ROLE
+        User forAuth = userRepository.findByEmail(email);
+        if (forAuth == null) {
+            forAuth = existingUser;
+        }
+        Role role = forAuth.getRole() != null ? forAuth.getRole() : Role.USER;
+
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-
-        // Add role authority (Spring expects "ROLE_" prefix)
-        String roleAuthority = "ROLE_" + existingUser.getRole().name();
+        String roleAuthority = "ROLE_" + role.name();
         authorities.add(new SimpleGrantedAuthority(roleAuthority));
-
+        
         System.out.println("🔐 Setting authority: " + roleAuthority + " for user: " + email);
 
         // Return new OAuth2User with updated authorities

@@ -1,9 +1,9 @@
 package backend.service;
 
 import backend.entity.Notification;
-import backend.entity.Ticket;
 import backend.entity.TicketComment;
 import backend.entity.User;
+import backend.model.Ticket;
 import backend.repository.NotificationRepository;
 import backend.repository.TicketCommentRepository;
 import backend.repository.TicketRepository;
@@ -58,14 +58,14 @@ public class TicketCommentService {
         String preview = message.length() > 60 ? message.substring(0, 60) + "..." : message;
         String notificationText = "New comment on ticket #" + ticket.getId() + ": " + preview;
 
-        if (!ticket.getReportedByEmail().equalsIgnoreCase(commenterEmail)) {
-            sendNotification(ticket.getReportedByEmail(), ticket.getId(), notificationText);
+        if (ticket.getCreatedBy() != null && !ticket.getCreatedBy().equalsIgnoreCase(commenterEmail)) {
+            sendNotification(ticket.getCreatedBy(), ticket.getId(), notificationText);
         }
 
-        if (ticket.getAssignedToEmail() != null
-                && !ticket.getAssignedToEmail().isBlank()
-                && !ticket.getAssignedToEmail().equalsIgnoreCase(commenterEmail)) {
-            sendNotification(ticket.getAssignedToEmail(), ticket.getId(), notificationText);
+        if (ticket.getAssignedTo() != null
+                && !ticket.getAssignedTo().isBlank()
+                && !ticket.getAssignedTo().equalsIgnoreCase(commenterEmail)) {
+            sendNotification(ticket.getAssignedTo(), ticket.getId(), notificationText);
         }
     }
 

@@ -80,6 +80,7 @@ function SignupPage() {
   };
 
   const handleSignup = async () => {
+    // Validate all fields
     const isNameValid = validateField("name", form.name);
     const isEmailValid = validateField("email", form.email);
     const isPasswordValid = validateField("password", form.password);
@@ -108,13 +109,6 @@ function SignupPage() {
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       handleSignup();
-    }
-  };
-
-  // ✅ Clear browser autofill value on focus
-  const handleEmailFocus = (e) => {
-    if (e.target.value === "gwannisekara@gmail.com") {
-      setForm((prev) => ({ ...prev, email: "" }));
     }
   };
 
@@ -155,17 +149,15 @@ function SignupPage() {
         />
         {errors.name && <div className="signup-error">{errors.name}</div>}
 
-        {/* Email input with autofill fix */}
+        {/* Email input */}
         <input
           type="email"
           name="email"
           placeholder="Email Address"
-          autoComplete="off"
           className={`signup-input ${errors.email ? "error" : ""}`}
           value={form.email}
           onChange={handleChange}
           onKeyPress={handleKeyPress}
-          onFocus={handleEmailFocus}
         />
         {errors.email && <div className="signup-error">{errors.email}</div>}
 

@@ -1,14 +1,17 @@
 const BASE_URL = "http://localhost:8081/api/users";
 
-// ✅ Login (returns fetch Response)
+// ✅ Login via Spring Security form login (session cookie) so /api/users/me and /api/tickets work
 export const loginUser = async (data) => {
-  return fetch(`${BASE_URL}/login`, {
+  const body = new URLSearchParams();
+  body.append("email", data.email);
+  body.append("password", data.password);
+  return fetch("http://localhost:8081/api/auth/login", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
     },
     credentials: "include",
-    body: JSON.stringify(data),
+    body: body.toString(),
   });
 };
 

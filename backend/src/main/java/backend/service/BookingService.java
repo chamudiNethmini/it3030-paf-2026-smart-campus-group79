@@ -10,7 +10,6 @@ import backend.enumtype.BookingStatus;
 import backend.repository.BookingRepository;
 import backend.repository.NotificationRepository;
 import backend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -21,18 +20,18 @@ import java.util.stream.Collectors;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    @Autowired
-    private NotificationRepository notificationRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
-    public BookingService(BookingRepository bookingRepository) {
+    public BookingService(BookingRepository bookingRepository, 
+                          UserRepository userRepository, 
+                          NotificationRepository notificationRepository, 
+                          SimpMessagingTemplate messagingTemplate) {
         this.bookingRepository = bookingRepository;
+        this.userRepository = userRepository;
+        this.notificationRepository = notificationRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     public BookingResponse createBooking(BookingRequest request) {

@@ -1,28 +1,37 @@
 package backend.controller;
 
-import backend.entity.Ticket;
+import backend.entity.Role;
 import backend.entity.TicketComment;
-import backend.entity.Ticket.TicketStatus;
+import backend.entity.User;
+import backend.model.Ticket;
+import backend.repository.TicketRepository;
+import backend.repository.UserRepository;
 import backend.service.TicketCommentService;
 import backend.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * TicketController - Member 3
- * REST endpoints for incident tickets, maintenance requests
- */
 @RestController
 @RequestMapping("/api/tickets")
-@CrossOrigin(origins = "http://localhost:3001")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:3002"}, allowCredentials = "true")
 public class TicketController {
+
+    @Autowired
+    private TicketRepository ticketRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private TicketService ticketService;
@@ -31,23 +40,15 @@ public class TicketController {
     private TicketCommentService ticketCommentService;
 
     /**
-     * Create a new ticket
-     */
-    @PostMapping
-    public ResponseEntity<Ticket> createTicket(@RequestBody Ticket ticket, Authentication auth) {
-        String userEmail = auth.getName();
-        ticket.setReportedByEmail(userEmail);
-        Ticket created = ticketService.createTicket(ticket);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
-    }
-
-    /**
-     * Get all tickets (admin only)
+     * USER: own tickets. ADMIN: all tickets.
      */
     @GetMapping
-    public ResponseEntity<List<Ticket>> getAllTickets() {
-        List<Ticket> tickets = ticketService.getAllTickets();
-        return ResponseEntity.ok(tickets);
+    public List<Ticket> listTickets(Authentication authentication) {
+        User actor = requireActor(authentication);
+        if (actor.getRole() == Role.ADMIN) {
+            return ticketRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+        }
+        return ticketRepository.findByCreatedByOrderByIdDesc(actor.getEmail());
     }
 
     /**
@@ -75,10 +76,8 @@ public class TicketController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Ticket> getTicketById(@PathVariable Long id) {
-        Ticket ticket = ticketService.getAllTickets().stream()
-                .filter(t -> t.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
         return ResponseEntity.ok(ticket);
     }
 
@@ -102,6 +101,54 @@ public class TicketController {
         return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
 
+    @PostMapping("/submit")
+    public ResponseEntity<?> submitTicket(
+            Authentication authentication,
+            @RequestParam String resourceLocation,
+            @RequestParam String category,
+            @RequestParam String description,
+            @RequestParam String priority,
+            @RequestParam String contactDetails,
+            @RequestParam(required = false) List<MultipartFile> files
+    ) {
+        try {
+            User actor = requireActor(authentication);
+            if (actor.getRole() == Role.ADMIN) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Admins cannot raise tickets. Admin can reply/update user tickets.");
+            }
+
+            Ticket ticket = new Ticket();
+            ticket.setResourceLocation(resourceLocation);
+            ticket.setCategory(category);
+            ticket.setDescription(description);
+            ticket.setContactDetails(contactDetails);
+            ticket.setCreatedBy(actor.getEmail());
+
+            // Enums handling (Assuming Ticket.Priority and Ticket.Status exist)
+            ticket.setPriority(Ticket.Priority.valueOf(priority.toUpperCase()));
+            ticket.setStatus(Ticket.Status.OPEN);
+
+            List<String> fileNames = new ArrayList<>();
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    if (!file.isEmpty()) {
+                        fileNames.add(file.getOriginalFilename());
+                    }
+                }
+            }
+            ticket.setAttachments(fileNames);
+
+            Ticket saved = ticketRepository.save(ticket);
+            return ResponseEntity.ok(saved);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid priority value");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Something went wrong");
+        }
+    }
+
     /**
      * Assign ticket to technician (admin only)
      */
@@ -123,23 +170,54 @@ public class TicketController {
             @RequestParam String status,
             @RequestParam(required = false) String resolution
     ) {
-        try {
-            TicketStatus newStatus = TicketStatus.valueOf(status.toUpperCase());
-            Ticket updated = ticketService.updateTicketStatus(id, newStatus, resolution);
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        Ticket updated = ticketService.updateTicketStatus(id, status, resolution);
+        return ResponseEntity.ok(updated);
     }
 
-    /**
-     * Delete ticket (admin only)
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteTicket(@PathVariable Long id) {
-        ticketService.deleteTicket(id);
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Ticket deleted successfully");
-        return ResponseEntity.ok(response);
+    @PostMapping("/{id}/replies")
+    public ResponseEntity<?> addReply(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload
+    ) {
+        User actor = requireActor(authentication);
+            if (actor.getRole() != Role.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Only admin can reply to tickets");
+        }
+        String message = payload.get("message");
+        if (message == null || message.isBlank()) {
+            return ResponseEntity.badRequest().body("Reply message is required");
+        }
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
+        
+        ticket.getReplies().add(new Ticket.TicketReply(
+                actor.getEmail(),
+                message.trim(),
+                java.time.LocalDateTime.now()
+        ));
+        return ResponseEntity.ok(ticketRepository.save(ticket));
+    }
+
+    private User requireActor(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login required");
+        }
+        Object principal = authentication.getPrincipal();
+        String email;
+        if (principal instanceof OAuth2User oAuth2User) {
+            email = oAuth2User.getAttribute("email");
+        } else {
+            email = authentication.getName();
+        }
+        if (email == null || email.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No email in session");
+        }
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not registered");
+        }
+        return user;
     }
 }

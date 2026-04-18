@@ -23,40 +23,30 @@ public class NotificationController {
     @Autowired
     private UserRepository userRepository;
 
-    // 🔔 Get all notifications (admin/old endpoint)
+    // 🔔 Get all notifications (Admin only is recommended, but keeping as per your code)
     @GetMapping
     public List<Notification> getAllNotifications() {
         return notificationRepository.findAll();
     }
 
-    // 👤 Get current user's notifications (authenticated)
-    @GetMapping("/user")
-    public List<Notification> getUserNotifications(Authentication auth) {
-        String email = auth.getName();
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            return List.of();
-        }
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
-    }
-
-    // 🔴 Mark as read
+    // 🔴 Mark a specific notification as read
     @PutMapping("/{id}/read")
     public Notification markAsRead(@PathVariable Long id, Authentication auth) {
         User user = getCurrentUser(auth);
         Notification notification = notificationRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found"));
+        
         notification.setRead(true);
         return notificationRepository.save(notification);
     }
 
-    // 🔥 Get unread count (all)
+    // 🔥 Global unread count
     @GetMapping("/unread")
     public long getUnreadCount() {
         return notificationRepository.countByIsReadFalse();
     }
 
-    // 👤 Get user's unread count
+    // 👤 Get currently logged-in user's unread count
     @GetMapping("/user/unread")
     public long getUserUnreadCount(Authentication auth) {
         String email = auth.getName();
@@ -67,27 +57,28 @@ public class NotificationController {
         return notificationRepository.countByUserIdAndIsReadFalse(user.getId());
     }
 
-    // 🎯 Get notifications by type
+    // 🎯 Get notifications by type (Admin only)
     @GetMapping("/type/{type}")
     public List<Notification> getNotificationsByType(@PathVariable String type, Authentication auth) {
         requireAdmin(auth);
         return notificationRepository.findByType(type);
     }
 
-    // 📚 Get notifications for specific booking
+    // 📚 Get notifications for specific booking (Admin only)
     @GetMapping("/booking/{bookingId}")
     public List<Notification> getBookingNotifications(@PathVariable Long bookingId, Authentication auth) {
         requireAdmin(auth);
         return notificationRepository.findByBookingIdOrderByCreatedAtDesc(bookingId);
     }
 
-    // 🎫 Get notifications for specific ticket
+    // 🎫 Get notifications for specific ticket (Admin only)
     @GetMapping("/ticket/{ticketId}")
     public List<Notification> getTicketNotifications(@PathVariable Long ticketId, Authentication auth) {
         requireAdmin(auth);
         return notificationRepository.findByTicketIdOrderByCreatedAtDesc(ticketId);
     }
 
+    // Helper method to get user from Authentication
     private User getCurrentUser(Authentication auth) {
         String email = auth.getName();
         User user = userRepository.findByEmail(email);
@@ -97,6 +88,7 @@ public class NotificationController {
         return user;
     }
 
+    // Helper method to check for Admin role
     private void requireAdmin(Authentication auth) {
         boolean isAdmin = auth.getAuthorities()
                 .stream()

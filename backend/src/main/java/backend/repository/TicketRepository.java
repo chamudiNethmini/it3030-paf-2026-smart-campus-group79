@@ -1,16 +1,15 @@
 package backend.repository;
 
-import backend.entity.Ticket;
-import backend.entity.Ticket.TicketStatus;
+import backend.model.Ticket;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-/**
- * Repository for Ticket entity - Member 3
- */
+@Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-    List<Ticket> findByReportedByEmail(String email);
-    List<Ticket> findByAssignedToEmail(String email);
-    List<Ticket> findByStatus(TicketStatus status);
-    List<Ticket> findByResourceId(Long resourceId);
+
+    List<Ticket> findByCreatedByOrderByIdDesc(String createdBy);
+
+    List<Ticket> findByAssignedToOrderByIdDesc(String assignedTo);
 }

@@ -50,7 +50,7 @@ function Dashboard() {
           >
             📅 {user?.role === "ADMIN" ? "Manage Bookings" : "Bookings"}
           </li>
-          <li onClick={() => navigate("/notifications")} className="menu-item">
+          <li onClick={() => navigate("/tickets")} className="menu-item">
             🎫 Tickets
           </li>
           <li onClick={() => navigate("/notifications")} className="menu-item">
