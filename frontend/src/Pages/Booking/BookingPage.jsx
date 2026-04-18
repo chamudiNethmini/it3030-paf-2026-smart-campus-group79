@@ -1,10 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { createBooking } from "../../services/bookingService";
 import Navbar from "../../Components/Navbar";
 import "./BookingPage.css";
 
 function BookingPage() {
   const bookingFormRef = useRef(null);
+  const [searchParams] = useSearchParams();
 
   const [formData, setFormData] = useState({
     resourceId: "",
@@ -19,15 +21,25 @@ function BookingPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  const scrollToForm = () => {
+    bookingFormRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const rid = searchParams.get("resourceId");
+    if (rid != null && String(rid).trim() !== "") {
+      const id = String(rid).trim();
+      setFormData((prev) => ({ ...prev, resourceId: id }));
+      const t = window.setTimeout(() => scrollToForm(), 250);
+      return () => window.clearTimeout(t);
+    }
+  }, [searchParams]);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
-  };
-
-  const scrollToForm = () => {
-    bookingFormRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleSubmit = async (e) => {

@@ -9,6 +9,35 @@ import {
 } from "../../services/resourceService";
 import "./AddResource.css";
 
+const NAME_MIN = 2;
+const NAME_MAX = 200;
+const LOCATION_MIN = 2;
+const LOCATION_MAX = 200;
+const DESCRIPTION_MAX = 500;
+const CAPACITY_MIN = 1;
+const CAPACITY_MAX = 50000;
+
+const RESOURCE_TYPES = ["LECTURE_HALL", "LAB", "MEETING_ROOM", "EQUIPMENT"];
+const RESOURCE_STATUSES = ["ACTIVE", "OUT_OF_SERVICE"];
+const ROOM_TYPES = ["LECTURE_HALL", "LAB", "MEETING_ROOM"];
+
+/** Shown in DB/catalogue when equipment has no physical location */
+const EQUIPMENT_LOCATION_DEFAULT = "Portable / campus-wide";
+
+const isRoomType = (type) => ROOM_TYPES.includes(type);
+const isEquipmentType = (type) => type === "EQUIPMENT";
+
+/** Parse "HH:MM" from time input to minutes since midnight; null if invalid */
+const timeToMinutes = (value) => {
+  if (!value || typeof value !== "string") return null;
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+  const h = Number(match[1]);
+  const m = Number(match[2]);
+  if (!Number.isInteger(h) || !Number.isInteger(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
+  return h * 60 + m;
+};
+
 const AddResource = () => {
   const navigate = useNavigate();
 
@@ -49,44 +78,59 @@ const AddResource = () => {
     loadResources();
   }, []);
 
-  const getNameLabel = () => {
-    switch (formData.type) {
-      case "LECTURE_HALL":
-        return "Hall Name";
-      case "LAB":
-        return "Lab Name";
-      case "MEETING_ROOM":
-        return "Meeting Room Name";
-      case "EQUIPMENT":
-        return "Equipment Name";
-      default:
-        return "Name";
-    }
-  };
-
   const validateField = (name, value, updatedForm = formData) => {
     switch (name) {
-      case "name":
-        if (!value.trim()) return "Name is required";
+      case "name": {
+        const t = String(value ?? "").trim();
+        if (!t) return "Name is required";
+        if (t.length < NAME_MIN) return `Name must be at least ${NAME_MIN} characters`;
+        if (t.length > NAME_MAX) return `Name must be at most ${NAME_MAX} characters`;
         return "";
-      case "capacity":
-        if (!value) return "Capacity is required";
-        if (Number(value) <= 0) return "Capacity must be greater than 0";
+      }
+      case "capacity": {
+        if (value === "" || value === null || value === undefined) return "Capacity is required";
+        const n = Number(value);
+        if (Number.isNaN(n)) return "Capacity must be a valid number";
+        if (!Number.isInteger(n)) return "Capacity must be a whole number";
+        if (n < CAPACITY_MIN) return `Capacity must be at least ${CAPACITY_MIN}`;
+        if (n > CAPACITY_MAX) return `Capacity must be at most ${CAPACITY_MAX.toLocaleString()}`;
         return "";
-      case "location":
-        if (!value.trim()) return "Location is required";
+      }
+      case "location": {
+        const t = String(value ?? "").trim();
+        if (!t) return "Location is required";
+        if (t.length < LOCATION_MIN) return `Location must be at least ${LOCATION_MIN} characters`;
+        if (t.length > LOCATION_MAX) return `Location must be at most ${LOCATION_MAX} characters`;
         return "";
-      case "availabilityStart":
+      }
+      case "availabilityStart": {
         if (!value) return "Start time is required";
-        if (updatedForm.availabilityEnd && value >= updatedForm.availabilityEnd) {
-          return "Start time must be before end time";
+        const startM = timeToMinutes(value);
+        if (startM === null) return "Enter a valid start time";
+        const endM = timeToMinutes(updatedForm.availabilityEnd);
+        if (endM !== null && startM >= endM) return "Start time must be before end time";
+        return "";
+      }
+      case "availabilityEnd": {
+        if (!value) return "End time is required";
+        const endM = timeToMinutes(value);
+        if (endM === null) return "Enter a valid end time";
+        const startM = timeToMinutes(updatedForm.availabilityStart);
+        if (startM !== null && endM <= startM) return "End time must be after start time";
+        return "";
+      }
+      case "description": {
+        const t = String(value ?? "");
+        if (t.length > DESCRIPTION_MAX) {
+          return `Description must be at most ${DESCRIPTION_MAX} characters`;
         }
         return "";
-      case "availabilityEnd":
-        if (!value) return "End time is required";
-        if (updatedForm.availabilityStart && value <= updatedForm.availabilityStart) {
-          return "End time must be after start time";
-        }
+      }
+      case "type":
+        if (!RESOURCE_TYPES.includes(value)) return "Select a valid resource type";
+        return "";
+      case "status":
+        if (!RESOURCE_STATUSES.includes(value)) return "Select a valid status";
         return "";
       default:
         return "";
@@ -94,12 +138,18 @@ const AddResource = () => {
   };
 
   const validateForm = () => {
+    const room = isRoomType(formData.type);
+    const equip = isEquipmentType(formData.type);
+
     const newErrors = {
-      name: validateField("name", formData.name),
+      type: validateField("type", formData.type),
+      name: equip ? validateField("name", formData.name) : "",
       capacity: validateField("capacity", formData.capacity),
-      location: validateField("location", formData.location),
+      location: room ? validateField("location", formData.location) : "",
       availabilityStart: validateField("availabilityStart", formData.availabilityStart),
       availabilityEnd: validateField("availabilityEnd", formData.availabilityEnd),
+      status: validateField("status", formData.status),
+      description: validateField("description", formData.description),
     };
 
     setErrors(newErrors);
@@ -108,13 +158,31 @@ const AddResource = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const updatedForm = { ...formData, [name]: value };
+    let updatedForm = { ...formData, [name]: value };
+
+    if (name === "type") {
+      if (isEquipmentType(value)) {
+        updatedForm = {
+          ...updatedForm,
+          location: editingId ? updatedForm.location : "",
+        };
+      }
+      if (isRoomType(value)) {
+        updatedForm = { ...updatedForm, name: "" };
+      }
+    }
+
     setFormData(updatedForm);
 
-    setErrors((prev) => ({
-      ...prev,
-      [name]: validateField(name, updatedForm[name], updatedForm),
-    }));
+    setErrors((prev) => {
+      const fieldErr = validateField(name, updatedForm[name], updatedForm);
+      const next = { ...prev, [name]: fieldErr };
+      if (name === "type") {
+        if (isRoomType(value)) next.name = "";
+        if (isEquipmentType(value)) next.location = "";
+      }
+      return next;
+    });
   };
 
   const resetForm = () => {
@@ -129,12 +197,24 @@ const AddResource = () => {
     if (!validateForm()) return;
 
     try {
+      const room = isRoomType(formData.type);
+      const equip = isEquipmentType(formData.type);
+
       const payload = {
         ...formData,
         capacity: Number(formData.capacity),
         availabilityStart: `${formData.availabilityStart}:00`,
         availabilityEnd: `${formData.availabilityEnd}:00`,
       };
+
+      if (room) {
+        const loc = String(formData.location ?? "").trim();
+        payload.name = loc;
+        payload.location = loc;
+      } else if (equip) {
+        const locTrim = String(formData.location ?? "").trim();
+        payload.location = locTrim || EQUIPMENT_LOCATION_DEFAULT;
+      }
 
       if (editingId) {
         await updateResource(editingId, payload);
@@ -161,6 +241,7 @@ const AddResource = () => {
 
   const handleEdit = (resource) => {
     setEditingId(resource.id);
+    setErrors({});
     setFormData({
       name: resource.name || "",
       type: resource.type || "LECTURE_HALL",
@@ -233,6 +314,9 @@ const AddResource = () => {
     loadResources();
   };
 
+  const room = isRoomType(formData.type);
+  const equipment = isEquipmentType(formData.type);
+
   return (
     <div className="admin-resource-page">
       <div className="admin-resource-hero">
@@ -272,7 +356,7 @@ const AddResource = () => {
         <div className="resource-form-card">
           <h2>{editingId ? "Edit Resource" : "Resource Form"}</h2>
 
-          <form onSubmit={handleSubmit} className="resource-form">
+          <form onSubmit={handleSubmit} className="resource-form" noValidate>
             <div className="form-group">
               <label>Resource Type</label>
               <select name="type" value={formData.type} onChange={handleChange}>
@@ -281,44 +365,52 @@ const AddResource = () => {
                 <option value="MEETING_ROOM">Meeting Room</option>
                 <option value="EQUIPMENT">Equipment</option>
               </select>
+              {errors.type && <span className="field-error">{errors.type}</span>}
             </div>
 
-            <div className="form-group">
-              <label>{getNameLabel()}</label>
-              <input
-                type="text"
-                name="name"
-                placeholder={`Enter ${getNameLabel().toLowerCase()}`}
-                value={formData.name}
-                onChange={handleChange}
-              />
-              {errors.name && <span className="field-error">{errors.name}</span>}
-            </div>
-
-            <div className="form-two-col">
+            {equipment && (
               <div className="form-group">
-                <label>Capacity</label>
+                <label>Equipment name</label>
                 <input
-                  type="number"
-                  name="capacity"
-                  placeholder="Enter capacity"
-                  value={formData.capacity}
+                  type="text"
+                  name="name"
+                  maxLength={NAME_MAX}
+                  placeholder="e.g. Projector set A, DSLR camera kit"
+                  value={formData.name}
                   onChange={handleChange}
                 />
-                {errors.capacity && <span className="field-error">{errors.capacity}</span>}
+                {errors.name && <span className="field-error">{errors.name}</span>}
               </div>
+            )}
 
+            {room && (
               <div className="form-group">
                 <label>Location</label>
                 <input
                   type="text"
                   name="location"
-                  placeholder="Enter location"
+                  maxLength={LOCATION_MAX}
+                  placeholder="Building, floor, room (used as the catalogue name)"
                   value={formData.location}
                   onChange={handleChange}
                 />
                 {errors.location && <span className="field-error">{errors.location}</span>}
               </div>
+            )}
+
+            <div className="form-group">
+              <label>Capacity</label>
+              <input
+                type="number"
+                name="capacity"
+                min={CAPACITY_MIN}
+                max={CAPACITY_MAX}
+                step={1}
+                placeholder="Enter capacity"
+                value={formData.capacity}
+                onChange={handleChange}
+              />
+              {errors.capacity && <span className="field-error">{errors.capacity}</span>}
             </div>
 
             <div className="form-two-col">
@@ -351,17 +443,23 @@ const AddResource = () => {
                 <option value="ACTIVE">ACTIVE</option>
                 <option value="OUT_OF_SERVICE">OUT_OF_SERVICE</option>
               </select>
+              {errors.status && <span className="field-error">{errors.status}</span>}
             </div>
 
             <div className="form-group">
-              <label>Description</label>
+              <label>Description (optional)</label>
               <textarea
                 rows="4"
                 name="description"
+                maxLength={DESCRIPTION_MAX}
                 placeholder="Enter description"
                 value={formData.description}
                 onChange={handleChange}
               />
+              <div className="field-hint">
+                {formData.description.length}/{DESCRIPTION_MAX} characters
+              </div>
+              {errors.description && <span className="field-error">{errors.description}</span>}
             </div>
 
             <div className="form-actions">

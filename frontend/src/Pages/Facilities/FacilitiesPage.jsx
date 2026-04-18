@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 import { getAllResources, searchResources } from "../../services/resourceService";
 import "./FacilitiesPage.css";
 
 const FacilitiesPage = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const isAdmin = user?.role === "ADMIN";
 
   const [resources, setResources] = useState([]);
   const [searchBy, setSearchBy] = useState("type");
@@ -93,9 +96,11 @@ const FacilitiesPage = () => {
             <button onClick={() => navigate("/facilities")} className="facilities-nav-btn active-nav">
               Browse Resources
             </button>
-            <button onClick={() => navigate("/admin/add-resource")} className="facilities-nav-btn">
-              Manage Resources
-            </button>
+            {isAdmin && (
+              <button onClick={() => navigate("/admin/add-resource")} className="facilities-nav-btn">
+                Manage Resources
+              </button>
+            )}
           </div>
         </div>
 
@@ -148,9 +153,11 @@ const FacilitiesPage = () => {
       <div className="facilities-list-section">
         <div className="section-top">
           <h2>Available Resources</h2>
-          <button className="manage-resource-btn" onClick={() => navigate("/admin/add-resource")}>
-            Go to Manage Resources
-          </button>
+          {isAdmin && (
+            <button className="manage-resource-btn" onClick={() => navigate("/admin/add-resource")}>
+              Go to Manage Resources
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -180,6 +187,22 @@ const FacilitiesPage = () => {
                     <strong>Availability:</strong> {resource.availabilityStart} - {resource.availabilityEnd}
                   </p>
                   <p><strong>Description:</strong> {resource.description || "N/A"}</p>
+
+                  <div className="facility-card-footer">
+                    <button
+                      type="button"
+                      className="facility-booking-btn"
+                      disabled={resource.status !== "ACTIVE"}
+                      title={
+                        resource.status !== "ACTIVE"
+                          ? "This resource is not available for booking"
+                          : "Go to bookings for this resource"
+                      }
+                      onClick={() => navigate(`/bookings?resourceId=${resource.id}`)}
+                    >
+                      Booking
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (
