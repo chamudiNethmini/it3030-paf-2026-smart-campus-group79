@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -27,6 +28,13 @@ public class NotificationController {
     @GetMapping
     public List<Notification> getAllNotifications() {
         return notificationRepository.findAll();
+    }
+
+    // 👤 Get notifications for currently logged-in user
+    @GetMapping("/user")
+    public List<Notification> getUserNotifications(Authentication auth) {
+        User user = getCurrentUser(auth);
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
     }
 
     // 🔴 Mark a specific notification as read
@@ -49,8 +57,7 @@ public class NotificationController {
     // 👤 Get currently logged-in user's unread count
     @GetMapping("/user/unread")
     public long getUserUnreadCount(Authentication auth) {
-        String email = auth.getName();
-        User user = userRepository.findByEmail(email);
+        User user = getCurrentUser(auth);
         if (user == null) {
             return 0;
         }
@@ -80,8 +87,22 @@ public class NotificationController {
 
     // Helper method to get user from Authentication
     private User getCurrentUser(Authentication auth) {
-        String email = auth.getName();
-        User user = userRepository.findByEmail(email);
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
+
+        String email;
+        if (auth.getPrincipal() instanceof OAuth2User oAuth2User) {
+            email = oAuth2User.getAttribute("email");
+        } else {
+            email = auth.getName();
+        }
+
+        if (email == null || email.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to resolve user email");
+        }
+
+        User user = userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found");
         }
