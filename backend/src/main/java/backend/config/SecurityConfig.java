@@ -37,42 +37,33 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
                         .requestMatchers("/", "/login**", "/error", "/ws/**", "/oauth2/**", "/api/auth/**").permitAll()
                         .requestMatchers("/api/resources/**").permitAll()
-                        
-                        // User endpoints: allow login and get current user publicly
+
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .requestMatchers("/api/users/login").permitAll()
                         .requestMatchers("/api/users/me").permitAll()
 
-                        // Admin specific user management
                         .requestMatchers(HttpMethod.GET, "/api/users/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/users/*/role").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasRole("ADMIN")
-                        
-                        // All other /api/users/** endpoints require ADMIN role
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-                        // Booking Management
-                        .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/status").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/status").hasAnyRole("ADMIN", "TECHNICIAN")
                         .requestMatchers(HttpMethod.DELETE, "/api/bookings/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/bookings").hasAnyRole("ADMIN", "TECHNICIAN")
                         .requestMatchers("/api/bookings/**").authenticated()
 
-                        // Ticket Management
                         .requestMatchers(HttpMethod.GET, "/api/tickets").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/tickets/*/assign").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/tickets/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/tickets/*/status").hasAnyRole("TECHNICIAN", "ADMIN")
                         .requestMatchers("/api/tickets/**").authenticated()
 
-                        // Notification Management
                         .requestMatchers(HttpMethod.GET, "/api/notifications").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/notifications/unread").hasRole("ADMIN")
                         .requestMatchers("/api/notifications/**").authenticated()
 
-                        // Any other request requires authentication
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -91,7 +82,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ CORS config for local frontend ports (3000, 3001, 3002, 5173, 5174)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -102,7 +92,7 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://localhost:5174"
         ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

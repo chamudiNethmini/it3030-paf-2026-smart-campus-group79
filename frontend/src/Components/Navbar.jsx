@@ -15,10 +15,8 @@ function Navbar() {
     if (user?.id) {
       loadUnread();
 
-      // සෑම තත්පර 10 කට වරක් unread count එක check කිරීමට (Optional)
       const interval = setInterval(loadUnread, 10000);
 
-      // WebSocket හරහා Real-time notifications ලබා ගැනීම
       connectSocket(user.id, (notification) => {
         toast.info(notification.message);
         setUnread((prev) => prev + 1);
@@ -46,14 +44,16 @@ function Navbar() {
     window.location.href = "/";
   };
 
-  // Active link එක බලාගැනීමට helper function එකක්
   const isActive = (path) => (location.pathname === path ? "active-link" : "");
 
   return (
     <div className="navbar-wrapper">
       <nav className="navbar">
         <div className="navbar-left">
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+          <Link
+            to="/"
+            style={{ textDecoration: "none", display: "flex", alignItems: "center" }}
+          >
             <div className="navbar-logo-circle">SC</div>
             <div className="navbar-brand">
               <h2>Smart Campus</h2>
@@ -65,15 +65,22 @@ function Navbar() {
         <div className="navbar-center">
           {user && (
             <>
-              {/* පොදු links (USER සහ ADMIN දෙන්නාටම) */}
-              <Link to="/facilities" className={isActive("/facilities")}>Facilities</Link>
-              <Link to="/bookings" className={isActive("/bookings")}>Book Resource</Link>
-              <Link to="/dashboard" className={isActive("/dashboard")}>My Bookings</Link>
-              
-              {/* Help Desk / Tickets Link */}
-              <Link to="/tickets" className={isActive("/tickets")}>Help Desk</Link>
+              <Link to="/facilities" className={isActive("/facilities")}>
+                Facilities
+              </Link>
 
-              {/* Notifications Link with Badge */}
+              <Link to="/bookings" className={isActive("/bookings")}>
+                Book Resource
+              </Link>
+
+              <Link to="/my-bookings" className={isActive("/my-bookings")}>
+                My Bookings
+              </Link>
+
+              <Link to="/tickets" className={isActive("/tickets")}>
+                Help Desk
+              </Link>
+
               <Link to="/notifications" className={isActive("/notifications")}>
                 Notifications
                 {unread > 0 && <span className="notif-badge">{unread}</span>}
@@ -81,19 +88,27 @@ function Navbar() {
             </>
           )}
 
-          {/* ADMIN ONLY links */}
           {user?.role === "ADMIN" && (
             <>
               <div className="admin-divider">|</div>
-              <Link to="/admin/manage-bookings" className={isActive("/admin/manage-bookings")}>Manage Bookings</Link>
-              <Link to="/admin/roles" className={isActive("/admin/roles")}>Manage Roles</Link>
+              <Link
+                to="/admin/manage-bookings"
+                className={isActive("/admin/manage-bookings")}
+              >
+                Manage Bookings
+              </Link>
+              <Link to="/admin/roles" className={isActive("/admin/roles")}>
+                Manage Roles
+              </Link>
             </>
           )}
         </div>
 
         <div className="navbar-right">
           {!user ? (
-            <Link to="/login" className="navbar-btn">Login</Link>
+            <Link to="/login" className="navbar-btn">
+              Login
+            </Link>
           ) : (
             <>
               <div className="user-info">

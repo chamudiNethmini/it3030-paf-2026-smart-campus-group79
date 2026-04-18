@@ -114,9 +114,9 @@ public class BookingService {
 
         Booking updatedBooking = bookingRepository.save(booking);
 
-        // 🔔 SEND NOTIFICATION TO USER ON STATUS CHANGE
-        String notifMessage = "";
-        String notifType = "";
+        String notifMessage;
+        String notifType;
+        String rejectionReason = request.getAdminReason() == null ? "" : request.getAdminReason().trim();
 
         switch (request.getStatus()) {
             case APPROVED:
@@ -124,7 +124,9 @@ public class BookingService {
                 notifType = "BOOKING_APPROVED";
                 break;
             case REJECTED:
-                notifMessage = "❌ Your booking #" + id + " has been REJECTED. Reason: " + request.getAdminReason();
+                notifMessage = rejectionReason.isBlank()
+                        ? "❌ Your booking #" + id + " has been REJECTED."
+                        : "❌ Your booking #" + id + " has been REJECTED. Reason: " + rejectionReason;
                 notifType = "BOOKING_REJECTED";
                 break;
             case CANCELLED:
@@ -136,19 +138,22 @@ public class BookingService {
                 notifType = "BOOKING_UPDATED";
         }
 
-        // Get user and create notification
-        User user = userRepository.findByEmail(booking.getUserEmail());
-        if (user != null) {
-            Notification notif = new Notification(notifMessage, notifType, user.getId());
-            notif.setBookingId(id);
-            Notification savedNotif = notificationRepository.save(notif);
+        sendBookingNotificationToUser(booking.getUserEmail(), id, notifMessage, notifType);
 
-            // Send via user-scoped WebSocket topic
-            messagingTemplate.convertAndSend("/topic/notifications/" + user.getId(), savedNotif);
+        return mapToResponse(updatedBooking);
+    }
 
-            System.out.println("🔔 Booking notification sent: " + notifMessage);
+    public BookingResponse cancelMyBooking(Long id, String requestUserEmail) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
+
+        if (requestUserEmail == null || !booking.getUserEmail().equalsIgnoreCase(requestUserEmail)) {
+            throw new RuntimeException("You can only cancel your own booking");
         }
 
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking.setAdminReason("Cancelled by user");
+        Booking updatedBooking = bookingRepository.save(booking);
         return mapToResponse(updatedBooking);
     }
 
@@ -156,7 +161,28 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
 
+        sendBookingNotificationToUser(
+                booking.getUserEmail(),
+                id,
+                "🗑️ Your booking #" + id + " has been DELETED by admin.",
+                "BOOKING_DELETED"
+        );
+
         bookingRepository.delete(booking);
+    }
+
+    private void sendBookingNotificationToUser(String userEmail, Long bookingId, String message, String type) {
+        User user = userRepository.findByEmail(userEmail);
+        if (user == null) {
+            return;
+        }
+
+        Notification notification = new Notification(message, type, user.getId());
+        notification.setBookingId(bookingId);
+        Notification savedNotification = notificationRepository.save(notification);
+
+        // user-specific WebSocket channel to show instant in-app alert
+        messagingTemplate.convertAndSend("/topic/notifications/" + user.getId(), savedNotification);
     }
 
     private BookingResponse mapToResponse(Booking booking) {

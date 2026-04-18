@@ -118,7 +118,11 @@ function ManageBookings() {
       fetchPageData();
     } catch (err) {
       console.error("Error updating booking:", err);
-      setError("Failed to update booking status");
+      setError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          `Failed to update booking status (${err?.response?.status || "unknown"})`
+      );
     }
   };
 
