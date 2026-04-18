@@ -13,6 +13,7 @@ import Dashboard from "./Pages/Dashboard/Dashboard";
 import FacilitiesPage from "./Pages/Facilities/FacilitiesPage";
 import AddResource from "./Pages/Admin/AddResource";
 import BookingPage from "./Pages/Booking/BookingPage";
+import UserDashboard from "./Pages/Booking/UserDashboard";
 import ManageBookings from "./Pages/Admin/ManageBookings";
 import NotificationsPage from "./Pages/Notifications/NotificationsPage";
 import Profile from "./Pages/Profile/Profile";
@@ -53,6 +54,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <BookingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/my-bookings"
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
               </ProtectedRoute>
             }
           />
