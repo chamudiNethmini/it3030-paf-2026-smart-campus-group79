@@ -31,33 +31,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             User newUser = new User();
             newUser.setName(name);
             newUser.setEmail(email);
-
-            // default role USER
-            Role userRole = Role.USER;
-
-            // admin email check - testing
-            if (email.equals("gayanthawannisekara@gmail.com")) {
-                userRole = Role.ADMIN;
-            }
-
-            newUser.setRole(userRole);
+            newUser.setRole(Role.USER);
             existingUser = userRepository.save(newUser);
-            System.out.println("✅ New OAuth user created: " + email + " with role: " + userRole);
+            System.out.println("✅ New OAuth user created: " + email + " with role: USER");
         } else {
-            // Update existing user's role if needed
-            if (email.equals("gayanthawannisekara@gmail.com") && existingUser.getRole() != Role.ADMIN) {
-                existingUser.setRole(Role.ADMIN);
-                userRepository.save(existingUser);
-                System.out.println("✅ Updated OAuth user role to ADMIN: " + email);
-            }
-            System.out.println("✅ OAuth user already exists: " + email + " with role: " + existingUser.getRole());
+            // Role always comes from the database (set by admin / seed data)
+            System.out.println("✅ OAuth user found in DB: " + email + " with role: " + existingUser.getRole());
         }
 
-        // 🔥 SET PROPER AUTHORITIES BASED ON ROLE
+        User forAuth = userRepository.findByEmail(email);
+        if (forAuth == null) {
+            forAuth = existingUser;
+        }
+        Role role = forAuth.getRole() != null ? forAuth.getRole() : Role.USER;
+
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        
-        // Add role authority (Spring expects "ROLE_" prefix)
-        String roleAuthority = "ROLE_" + existingUser.getRole().name();
+        String roleAuthority = "ROLE_" + role.name();
         authorities.add(new SimpleGrantedAuthority(roleAuthority));
         
         System.out.println("🔐 Setting authority: " + roleAuthority + " for user: " + email);

@@ -5,7 +5,7 @@ import {
   deleteBooking
 } from "../../services/bookingService";
 import "./ManageBookings.css";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../Components/Navbar";
 
 
 function ManageBookings() {

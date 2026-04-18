@@ -1,6 +1,8 @@
 package backend.model;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +14,6 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // matches: resource_location
     @Column(name = "resource_location", nullable = false)
     private String resourceLocation;
 
@@ -21,7 +22,6 @@ public class Ticket {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // matches: contact_details
     @Column(name = "contact_details")
     private String contactDetails;
 
@@ -43,7 +43,6 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
-    // Attachments table mapping
     @ElementCollection
     @CollectionTable(
             name = "ticket_attachments",
@@ -52,7 +51,58 @@ public class Ticket {
     @Column(name = "image_url")
     private List<String> attachments = new ArrayList<>();
 
-    // Enums
+    @ElementCollection
+    @CollectionTable(
+            name = "ticket_replies",
+            joinColumns = @JoinColumn(name = "ticket_id")
+    )
+    private List<TicketReply> replies = new ArrayList<>();
+
+    @Embeddable
+    public static class TicketReply {
+        @Column(name = "author_email")
+        private String authorEmail;
+
+        @Column(name = "message", columnDefinition = "TEXT")
+        private String message;
+
+        @Column(name = "created_at")
+        private LocalDateTime createdAt;
+
+        public TicketReply() {
+        }
+
+        public TicketReply(String authorEmail, String message, LocalDateTime createdAt) {
+            this.authorEmail = authorEmail;
+            this.message = message;
+            this.createdAt = createdAt;
+        }
+
+        public String getAuthorEmail() {
+            return authorEmail;
+        }
+
+        public void setAuthorEmail(String authorEmail) {
+            this.authorEmail = authorEmail;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public LocalDateTime getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+        }
+    }
+
     public enum Status {
         OPEN, IN_PROGRESS, RESOLVED, CLOSED, REJECTED
     }
@@ -60,8 +110,6 @@ public class Ticket {
     public enum Priority {
         LOW, MEDIUM, HIGH, URGENT
     }
-
-    // ================= GETTERS & SETTERS =================
 
     public Long getId() {
         return id;
@@ -153,5 +201,13 @@ public class Ticket {
 
     public void setAttachments(List<String> attachments) {
         this.attachments = attachments;
+    }
+
+    public List<TicketReply> getReplies() {
+        return replies;
+    }
+
+    public void setReplies(List<TicketReply> replies) {
+        this.replies = replies;
     }
 }

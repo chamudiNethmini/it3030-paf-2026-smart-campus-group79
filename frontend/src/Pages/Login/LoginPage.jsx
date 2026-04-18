@@ -95,8 +95,14 @@ function LoginPage() {
         localStorage.setItem("user", JSON.stringify(userData));
         navigate("/dashboard");
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || "Invalid email or password");
+        let msg = "Invalid email or password";
+        try {
+          const errorData = await response.json();
+          msg = errorData.message || errorData.error || msg;
+        } catch {
+          /* non-JSON body */
+        }
+        setError(msg);
       }
     } catch (err) {
       setError("Login failed. Please check your connection and try again.");
