@@ -153,6 +153,20 @@ public class BookingService {
         return mapToResponse(updatedBooking);
     }
 
+    public BookingResponse cancelMyBooking(Long id, String requestUserEmail) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
+
+        if (requestUserEmail == null || !booking.getUserEmail().equalsIgnoreCase(requestUserEmail)) {
+            throw new RuntimeException("You can only cancel your own booking");
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking.setAdminReason("Cancelled by user");
+        Booking updatedBooking = bookingRepository.save(booking);
+        return mapToResponse(updatedBooking);
+    }
+
     public void deleteBooking(Long id) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));

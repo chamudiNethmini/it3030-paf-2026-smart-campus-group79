@@ -231,7 +231,7 @@ function BookingPage() {
 
             <div className="booking-hero-buttons">
               <button onClick={scrollToForm}>Create Booking</button>
-              <a href="/dashboard">My Bookings</a>
+              <a href="/my-bookings">My Bookings</a>
             </div>
           </div>
         </div>
