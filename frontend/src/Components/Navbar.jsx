@@ -63,46 +63,50 @@ function Navbar() {
         </div>
 
         <div className="navbar-center">
-          {user && (
-            <>
-              <Link to="/facilities" className={isActive("/facilities")}>
-                Facilities
-              </Link>
+  {user && (
+    <>
+      <Link to="/facilities" className={isActive("/facilities")}>
+        Facilities
+      </Link>
 
-              <Link to="/bookings" className={isActive("/bookings")}>
-                Book Resource
-              </Link>
+      {user?.role !== "ADMIN" && (
+        <>
+          <Link to="/bookings" className={isActive("/bookings")}>
+            Book Resource
+          </Link>
 
-              <Link to="/my-bookings" className={isActive("/my-bookings")}>
-                My Bookings
-              </Link>
+          <Link to="/my-bookings" className={isActive("/my-bookings")}>
+            My Bookings
+          </Link>
+        </>
+      )}
 
-              <Link to="/tickets" className={isActive("/tickets")}>
-                Help Desk
-              </Link>
+      <Link to="/tickets" className={isActive("/tickets")}>
+        Help Desk
+      </Link>
 
-              <Link to="/notifications" className={isActive("/notifications")}>
-                Notifications
-                {unread > 0 && <span className="notif-badge">{unread}</span>}
-              </Link>
-            </>
-          )}
+      <Link to="/notifications" className={isActive("/notifications")}>
+        Notifications
+        {unread > 0 && <span className="notif-badge">{unread}</span>}
+      </Link>
+    </>
+  )}
 
-          {user?.role === "ADMIN" && (
-            <>
-              <div className="admin-divider">|</div>
-              <Link
-                to="/admin/manage-bookings"
-                className={isActive("/admin/manage-bookings")}
-              >
-                Manage Bookings
-              </Link>
-              <Link to="/admin/roles" className={isActive("/admin/roles")}>
-                Manage Roles
-              </Link>
-            </>
-          )}
-        </div>
+  {user?.role === "ADMIN" && (
+    <>
+      <div className="admin-divider">|</div>
+      <Link
+        to="/admin/manage-bookings"
+        className={isActive("/admin/manage-bookings")}
+      >
+        Manage Bookings
+      </Link>
+      <Link to="/admin/roles" className={isActive("/admin/roles")}>
+        Manage Roles
+      </Link>
+    </>
+  )}
+</div>
 
         <div className="navbar-right">
           {!user ? (
