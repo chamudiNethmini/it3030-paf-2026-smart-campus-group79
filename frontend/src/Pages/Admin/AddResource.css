@@ -432,32 +432,30 @@
   margin-bottom: 22px;
 }
 
+/* =========================
+   RESOURCE GRID - SHORT BOXES
+========================= */
 .resource-list-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
-  max-height: 900px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.resource-list-grid::-webkit-scrollbar {
-  width: 8px;
-}
-
-.resource-list-grid::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
+  max-height: unset;
+  overflow: visible;
+  padding-right: 0;
 }
 
 .resource-item-card {
-  background: rgba(255, 255, 255, 0.045);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  padding: 22px;
+  border-radius: 20px;
+  padding: 20px 20px 18px;
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .resource-item-card::before {
@@ -471,7 +469,7 @@
 
 .resource-item-card:hover {
   transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
 }
 
@@ -479,23 +477,23 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .resource-item-card h3 {
   color: var(--white);
   margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.25;
+  font-size: 1.05rem;
+  line-height: 1.2;
   font-weight: 700;
 }
 
 .resource-item-card p {
   color: var(--muted);
-  line-height: 1.7;
-  margin-bottom: 10px;
-  font-size: 14px;
+  line-height: 1.55;
+  margin-bottom: 8px;
+  font-size: 13px;
 }
 
 .resource-item-card p strong {
@@ -505,20 +503,31 @@
 .availability-pill {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: 999px;
   background: rgba(45, 212, 191, 0.12);
   color: #9ff3e8;
   border: 1px solid rgba(45, 212, 191, 0.2);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  margin-left: 6px;
+  margin-left: 4px;
 }
 
 .resource-card-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.resource-card-actions .edit-btn,
+.resource-card-actions .delete-btn {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  justify-content: center;
+  text-align: center;
+  display: inline-flex;
   align-items: center;
 }
 
@@ -527,48 +536,34 @@
   border: none;
   cursor: pointer;
   font-weight: 700;
-  border-radius: 12px;
-  padding: 12px 18px;
+  border-radius: 14px;
+  padding: 11px 16px;
   transition: var(--transition);
   font-size: 14px;
 }
 
-.resource-card-actions .edit-btn,
-.resource-card-actions .delete-btn {
-  flex: 0 0 auto;
-  min-width: 140px;
-  width: 160px;
-  justify-content: center;
-  text-align: center;
-  display: inline-flex;
-  align-items: center;
-}
-
 .edit-btn {
-  background: rgba(45, 212, 191, 0.14);
-  color: var(--teal);
-  border: 1px solid rgba(45, 212, 191, 0.24);
+  background: linear-gradient(135deg, #9fc4ff, #c8b7ff);
+  color: #1f3552;
 }
 
 .edit-btn:hover {
   transform: translateY(-2px);
-  background: rgba(45, 212, 191, 0.2);
+  filter: brightness(1.03);
 }
 
 .delete-btn {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ffb3b3;
-  border: 1px solid rgba(239, 68, 68, 0.18);
-  margin-left: auto;
+  background: linear-gradient(135deg, #f3d7d9, #eed1d3);
+  color: #b4232c;
 }
 
 .delete-btn:hover {
   transform: translateY(-2px);
-  background: rgba(239, 68, 68, 0.16);
+  filter: brightness(1.02);
 }
 
 .status-badge {
-  padding: 7px 12px;
+  padding: 6px 12px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 800;
@@ -603,6 +598,12 @@ button:disabled {
 /* =========================
    RESPONSIVE
 ========================= */
+@media (max-width: 1100px) {
+  .resource-list-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 980px) {
   .admin-resource-nav {
     border-radius: 28px;
@@ -615,8 +616,7 @@ button:disabled {
   }
 
   .resource-list-grid {
-    max-height: unset;
-    overflow-y: visible;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -645,7 +645,8 @@ button:disabled {
   }
 
   .form-two-col,
-  .search-bar-row {
+  .search-bar-row,
+  .resource-list-grid {
     grid-template-columns: 1fr;
   }
 
@@ -662,14 +663,8 @@ button:disabled {
     width: 100%;
   }
 
-  .resource-card-actions .edit-btn,
-  .resource-card-actions .delete-btn {
-    width: 100%;
-    min-width: unset;
-  }
-
-  .delete-btn {
-    margin-left: 0;
+  .resource-item-card {
+    min-height: auto;
   }
 
   .availability-pill {
