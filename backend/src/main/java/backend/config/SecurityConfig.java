@@ -49,10 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/status").hasAnyRole("ADMIN", "TECHNICIAN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/bookings/*").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/bookings").hasAnyRole("ADMIN", "TECHNICIAN")
-                        .requestMatchers("/api/bookings/**").authenticated()
+                        // Booking APIs allowed without login for Postman/testing
+                        .requestMatchers("/api/bookings/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/tickets").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/tickets/*/assign").hasRole("ADMIN")
@@ -64,7 +62,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/notifications/unread").hasRole("ADMIN")
                         .requestMatchers("/api/notifications/**").authenticated()
 
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
